@@ -260,20 +260,23 @@ function canGuestbookToday(ip) {
 // 提交留言
 function handleGuestbookPost(req, res) {
     const clientIP = getClientIP(req);
+    const isAdminUser = isAdmin(req);
     
-    // 检查IP是否在黑名单
-    if (isBlacklisted(clientIP)) {
+    // 检查IP是否在黑名单（管理员不受限制）
+    if (!isAdminUser && isBlacklisted(clientIP)) {
         res.writeHead(403, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: false, error: '您已被拉黑，无法留言' }));
         return;
     }
     
-    // 检查每日留言限制
-    const limitCheck = canGuestbookToday(clientIP);
-    if (!limitCheck.allowed) {
-        res.writeHead(429, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ success: false, error: limitCheck.error }));
-        return;
+    // 检查每日留言限制（管理员不受限制）
+    if (!isAdminUser) {
+        const limitCheck = canGuestbookToday(clientIP);
+        if (!limitCheck.allowed) {
+            res.writeHead(429, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: limitCheck.error }));
+            return;
+        }
     }
     
     let body = '';
@@ -302,7 +305,7 @@ function handleGuestbookPost(req, res) {
                 id: guestbookData.nextId++,
                 content: content,
                 ip: clientIP,
-                status: 'pending', // pending, approved, rejected
+                status: isAdminUser ? 'approved' : 'pending', // 管理员直接通过
                 timestamp: now.getTime(),
                 date: now.toLocaleDateString('zh-CN'),
                 time: now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
@@ -311,13 +314,18 @@ function handleGuestbookPost(req, res) {
             guestbookData.messages.push(message);
             saveGuestbookData();
             
-            // 记录该IP今天已留言
-            guestbookLimitMap.set(clientIP, now.toDateString());
+            // 非管理员记录该IP今天已留言
+            if (!isAdminUser) {
+                guestbookLimitMap.set(clientIP, now.toDateString());
+            }
             
-            log(`新留言提交: ID=${message.id}, IP=${clientIP}`);
+            log(`新留言提交: ID=${message.id}, IP=${clientIP}, 管理员: ${isAdminUser}`);
             
             res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true, message: '提交成功，等待审核' }));
+            res.end(JSON.stringify({ 
+                success: true, 
+                message: isAdminUser ? '管理员留言已发布' : '提交成功，等待审核'
+            }));
         } catch (e) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: false, error: '无效的请求' }));
