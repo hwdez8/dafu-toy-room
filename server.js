@@ -15,7 +15,7 @@ const url = require('url');
 // 配置
 const CONFIG = {
     port: process.env.PORT || 3000,
-    apiKey: process.env.DEEPSEEK_API_KEY || 'sk-6e1ba6b86479412f86086262082066a1',
+    apiKey: process.env.DEEPSEEK_API_KEY || '',
     apiEndpoint: 'api.deepseek.com',
     apiPath: '/v1/chat/completions',
     // 安全配置
@@ -318,9 +318,9 @@ function validateRequestBody(body) {
                     if (msg.content.length > 2000) {
                         return { valid: false, error: '消息内容过长' };
                     }
-                    // 只检查危险的HTML标签，允许正常标点符号
-                    if (/<script|<iframe|<object|<embed/i.test(msg.content)) {
-                        return { valid: false, error: '消息包含非法内容' };
+                    // 检查危险字符
+                    if (/[<>\"'&]/.test(msg.content)) {
+                        return { valid: false, error: '消息包含非法字符' };
                     }
                 }
             }

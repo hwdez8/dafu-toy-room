@@ -74,10 +74,12 @@ node --version
 3. **配置环境变量（可选）**
 ```bash
 # 编辑环境变量（推荐方式，更安全）
-export DEEPSEEK_API_KEY=sk-6e1ba6b86479412f86086262082066a1
+export DEEPSEEK_API_KEY=your-api-key-here
 export PORT=3000
 
 # 或者写入 ~/.bashrc
+echo 'export DEEPSEEK_API_KEY=your-api-key-here' >> ~/.bashrc
+source ~/.bashrc
 ```
 
 4. **启动服务**
