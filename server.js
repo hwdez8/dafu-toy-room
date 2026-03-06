@@ -17,7 +17,12 @@ const CONFIG = {
     port: process.env.PORT || 3000,
     apiKey: process.env.DEEPSEEK_API_KEY || '',
     apiEndpoint: 'api.deepseek.com',
-    apiPath: '/v1/chat/completions'
+    apiPath: '/v1/chat/completions',
+    // 安全配置
+    maxRequestSize: 1024 * 1024, // 1MB 最大请求体
+    allowedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://fufud.cc', 'https://www.fufud.cc', 'http://194.41.36.137:3000'],
+    rateLimitWindow: 60000, // 1分钟
+    rateLimitMax: 100 // 每分钟最大请求数
 };
 
 // ========================================
@@ -117,9 +122,24 @@ function saveStats() {
     }
 }
 
+// 简单的IP哈希函数（保护隐私）
+function hashIP(ip) {
+    // 使用简单的字符串哈希
+    let hash = 0;
+    for (let i = 0; i < ip.length; i++) {
+        const char = ip.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // 转为32位整数
+    }
+    return hash.toString(16);
+}
+
 // 记录访问
 function recordVisit(clientIP) {
     const today = new Date().toDateString();
+    
+    // 对IP进行哈希处理，保护隐私
+    const hashedIP = hashIP(clientIP);
     
     // 检查是否是新的一天
     if (serverStats.today.date !== today) {
@@ -143,9 +163,9 @@ function recordVisit(clientIP) {
     serverStats.today.totalVisits++;
     serverStats.total.totalVisits++;
     
-    // 检查是否为新访客（按IP）
-    if (!serverStats.today.visitorIPs.has(clientIP)) {
-        serverStats.today.visitorIPs.add(clientIP);
+    // 检查是否为新访客（使用哈希后的IP）
+    if (!serverStats.today.visitorIPs.has(hashedIP)) {
+        serverStats.today.visitorIPs.add(hashedIP);
         serverStats.today.uniqueVisitors++;
         serverStats.total.uniqueVisitors++;
     }
@@ -172,9 +192,7 @@ function recordModuleUsage(moduleName) {
 
 // 获取统计数据的API
 function handleStatsAPI(req, res) {
-    const clientIP = req.headers['x-forwarded-for'] || 
-                     req.connection.remoteAddress || 
-                     req.socket.remoteAddress;
+    const clientIP = getClientIP(req);
     
     log(`统计API请求: ${req.method} from ${clientIP}`);
     
@@ -288,18 +306,63 @@ function serveFile(filePath, res) {
     });
 }
 
+// 验证请求体
+function validateRequestBody(body) {
+    try {
+        const data = JSON.parse(body);
+        // 检查消息格式
+        if (data.messages && Array.isArray(data.messages)) {
+            for (const msg of data.messages) {
+                if (msg.content && typeof msg.content === 'string') {
+                    // 检查消息长度
+                    if (msg.content.length > 2000) {
+                        return { valid: false, error: '消息内容过长' };
+                    }
+                    // 检查危险字符
+                    if (/[<>\"'&]/.test(msg.content)) {
+                        return { valid: false, error: '消息包含非法字符' };
+                    }
+                }
+            }
+        }
+        return { valid: true };
+    } catch (e) {
+        return { valid: false, error: '无效的JSON格式' };
+    }
+}
+
 // 代理DeepSeek API请求
 function proxyDeepSeekAPI(req, res) {
     let body = '';
+    let bodySize = 0;
     
     req.on('data', chunk => {
+        bodySize += chunk.length;
+        // 检查请求体大小
+        if (bodySize > CONFIG.maxRequestSize) {
+            res.writeHead(413, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: '请求体过大' }));
+            req.destroy();
+            return;
+        }
         body += chunk.toString();
     });
     
     req.on('end', () => {
         log('收到AI聊天请求');
         log(`API端点: ${CONFIG.apiEndpoint}${CONFIG.apiPath}`);
-        log(`API密钥前10位: ${CONFIG.apiKey.substring(0, 10)}...`);
+        // 安全：不记录API密钥任何部分
+        
+        // 验证请求体
+        const validation = validateRequestBody(body);
+        if (!validation.valid) {
+            log(`请求体验证失败: ${validation.error}`, 'error');
+            res.writeHead(400, { 
+                'Content-Type': 'application/json'
+            });
+            res.end(JSON.stringify({ error: validation.error }));
+            return;
+        }
         
         // 解析请求体
         let requestData;
@@ -308,8 +371,7 @@ function proxyDeepSeekAPI(req, res) {
         } catch (e) {
             log('请求体解析失败', 'error');
             res.writeHead(400, { 
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Content-Type': 'application/json'
             });
             res.end(JSON.stringify({ error: '无效的请求体' }));
             return;
@@ -530,12 +592,78 @@ function generateBlessing(req, res) {
     apiReq.end();
 }
 
+// 简单的速率限制存储
+const rateLimitMap = new Map();
+
+// 检查速率限制
+function checkRateLimit(clientIP) {
+    const now = Date.now();
+    const windowStart = now - CONFIG.rateLimitWindow;
+    
+    if (!rateLimitMap.has(clientIP)) {
+        rateLimitMap.set(clientIP, []);
+    }
+    
+    const requests = rateLimitMap.get(clientIP);
+    // 清理过期请求
+    const validRequests = requests.filter(time => time > windowStart);
+    
+    if (validRequests.length >= CONFIG.rateLimitMax) {
+        return false;
+    }
+    
+    validRequests.push(now);
+    rateLimitMap.set(clientIP, validRequests);
+    return true;
+}
+
+// 设置安全响应头
+function setSecurityHeaders(res) {
+    // 防止点击劫持
+    res.setHeader('X-Frame-Options', 'DENY');
+    // XSS保护
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    // 防止MIME类型嗅探
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    // 内容安全策略
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'");
+    // 引用策略
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    // 权限策略
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+}
+
+// 获取客户端IP
+function getClientIP(req) {
+    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+           req.connection.remoteAddress || 
+           req.socket.remoteAddress ||
+           'unknown';
+}
+
 // 创建HTTP服务器
 const server = http.createServer((req, res) => {
-    // 设置CORS头
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const clientIP = getClientIP(req);
+    
+    // 设置安全响应头
+    setSecurityHeaders(res);
+    
+    // 速率限制检查
+    if (!checkRateLimit(clientIP)) {
+        res.writeHead(429, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: '请求过于频繁，请稍后再试' }));
+        log(`速率限制触发: ${clientIP}`, 'error');
+        return;
+    }
+    
+    // 设置CORS头 - 根据请求来源动态设置
+    const origin = req.headers.origin;
+    if (CONFIG.allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 预检请求缓存24小时
     
     // 处理OPTIONS请求
     if (req.method === 'OPTIONS') {
