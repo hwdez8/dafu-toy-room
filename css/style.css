@@ -861,6 +861,25 @@ textarea {
     font-family: 'Courier New', monospace;
 }
 
+.footer .github-link {
+    margin-top: 10px;
+}
+
+.footer .github-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer .github-link a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
 .footer i {
     color: var(--primary-color);
     animation: heartbeat 1.5s ease-in-out infinite;
@@ -2022,6 +2041,22 @@ textarea {
     opacity: 0.6;
     margin-top: 12px;
     font-family: 'Courier New', monospace;
+}
+
+.gate-github {
+    margin-top: 8px;
+}
+
+.gate-github a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.gate-github a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
 }
 
 /* 大门图标云装饰 */
