@@ -1,0 +1,23 @@
+{
+  "name": "dafu-toy-room",
+  "version": "1.0.0",
+  "description": "欢迎来到一只大福的玩具房 - 一个有趣的互动网站",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "game",
+    "chat",
+    "fortune",
+    "fun",
+    "interactive"
+  ],
+  "author": "大福",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>欢迎来到一只大福的玩具房</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 爱心背景装饰 -->
+    <div class="hearts-container" id="heartsContainer"></div>
+    
+    <!-- 大门界面 -->
+    <div id="gatePage" class="gate-page">
+        <!-- 大门背景装饰 -->
+        <div class="gate-bg-decoration" id="gateBgDecoration"></div>
+        
+        <div class="gate-container">
+            <!-- 大门标题 -->
+            <div class="gate-header">
+                <div class="gate-decoration top">
+                    <span class="gate-star">✨</span>
+                    <span class="gate-bow">🎀</span>
+                    <span class="gate-star">✨</span>
+                </div>
+                <h1 class="gate-title">
+                    <span class="gate-icon">🏰</span>
+                    一只大福的玩具房
+                    <span class="gate-icon">🏰</span>
+                </h1>
+                <p class="gate-subtitle">推开大门，探索奇妙世界</p>
+                <div class="gate-decoration bottom">
+                    <span class="gate-heart">💕</span>
+                    <span class="gate-cat">🐱</span>
+                    <span class="gate-heart">💕</span>
+                </div>
+            </div>
+
+            <!-- 游戏选择卡片网格 -->
+            <div class="gate-games-grid">
+                <div class="gate-card" data-game="guessNumber">
+                    <div class="gate-card-icon">🎲</div>
+                    <h3 class="gate-card-title">猜数字</h3>
+                    <p class="gate-card-desc">挑战你的直觉，猜中1-100的神秘数字</p>
+                    <div class="gate-card-emoji">🔢 ✨ 🎯</div>
+                </div>
+
+                <div class="gate-card" data-game="whatToEat">
+                    <div class="gate-card-icon">🍜</div>
+                    <h3 class="gate-card-title">今天吃什么</h3>
+                    <p class="gate-card-desc">选择困难症福音，让大福帮你决定</p>
+                    <div class="gate-card-emoji">🍕 🍣 🍰</div>
+                </div>
+
+                <div class="gate-card" data-game="fortune">
+                    <div class="gate-card-icon">🔮</div>
+                    <h3 class="gate-card-title">运势占卜</h3>
+                    <p class="gate-card-desc">小魔法猫咪为你揭示今日运势</p>
+                    <div class="gate-card-emoji">🌟 💫 ✨</div>
+                </div>
+
+                <div class="gate-card" data-game="blessing">
+                    <div class="gate-card-icon">🧧</div>
+                    <h3 class="gate-card-title">今日份福气</h3>
+                    <p class="gate-card-desc">领取专属福气，好运常伴左右</p>
+                    <div class="gate-card-emoji">🎀 🍀 💕</div>
+                </div>
+
+                <div class="gate-card" data-game="aiChat">
+                    <div class="gate-card-icon">🤖</div>
+                    <h3 class="gate-card-title">AI聊天</h3>
+                    <p class="gate-card-desc">和AI助手聊聊天，解解闷</p>
+                    <div class="gate-card-emoji">💬 😊 🌈</div>
+                </div>
+
+                <div class="gate-card" data-game="statistics">
+                    <div class="gate-card-icon">📊</div>
+                    <h3 class="gate-card-title">数据统计</h3>
+                    <p class="gate-card-desc">看看有多少人来过大福的玩具房</p>
+                    <div class="gate-card-emoji">📈 🎉 🏆</div>
+                </div>
+            </div>
+
+            <!-- 大门底部 -->
+            <div class="gate-footer">
+                <p class="gate-welcome">🎀 点击任意卡片开始探索 🎀</p>
+                <div class="gate-visitor-count">
+                    <span>👥 今日已有 <span id="gateVisitorCount">0</span> 位访客</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用界面（初始隐藏） -->
+    <div id="mainApp" class="main-container hidden">
+        <!-- 返回大门按钮 -->
+        <button id="backToGate" class="back-to-gate">
+            <i class="fas fa-arrow-left"></i>
+            <span>返回大门</span>
+        </button>
+
+        <!-- 头部标题 -->
+        <header class="header">
+            <h1 class="main-title">
+                <i class="fas fa-star title-icon"></i>
+                欢迎来到一只大福的玩具房
+                <i class="fas fa-star title-icon"></i>
+            </h1>
+            <p class="sub-title">🎀 欢迎来到大福的网站，随便逛逛玩玩吧XD 🎀</p>
+        </header>
+
+        <!-- 选项卡导航 -->
+        <nav class="tab-nav">
+            <button class="tab-btn" data-tab="guessNumber">
+                <i class="fas fa-dice"></i>
+                <span>猜数字</span>
+                <span class="tab-emoji">🔢</span>
+            </button>
+            <button class="tab-btn" data-tab="whatToEat">
+                <i class="fas fa-utensils"></i>
+                <span>今天吃什么</span>
+                <span class="tab-emoji">🍜</span>
+            </button>
+            <button class="tab-btn" data-tab="fortune">
+                <i class="fas fa-cat"></i>
+                <span>运势占卜</span>
+                <span class="tab-emoji">🔮</span>
+            </button>
+            <button class="tab-btn" data-tab="blessing">
+                <i class="fas fa-gift"></i>
+                <span>今日份福气</span>
+                <span class="tab-emoji">🎀</span>
+            </button>
+            <button class="tab-btn" data-tab="aiChat">
+                <i class="fas fa-robot"></i>
+                <span>AI聊天</span>
+                <span class="tab-emoji">🤖</span>
+            </button>
+            <button class="tab-btn" data-tab="statistics">
+                <i class="fas fa-chart-bar"></i>
+                <span>数据统计</span>
+                <span class="tab-emoji">📊</span>
+            </button>
+        </nav>
+
+        <!-- 选项卡内容区域 -->
+        <div class="tab-content-container">
+            <!-- 猜数字模块 -->
+            <div class="tab-panel active" id="guessNumberPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🎲</div>
+                    <h2 class="panel-title">猜数字游戏</h2>
+                    <p class="panel-desc">我想了一个1-100的数字，你能猜中吗？</p>
+                </div>
+                <div class="panel-body">
+                    <div class="game-area-large">
+                        <div class="guess-display">
+                            <div class="guess-number-hint">?</div>
+                            <p class="guess-range">数字范围：1 - 100</p>
+                        </div>
+                        <div class="guess-input-area">
+                            <input type="number" id="guessInput" placeholder="输入你的猜测" min="1" max="100">
+                            <button id="guessBtn" class="btn-primary btn-giant">
+                                <i class="fas fa-paper-plane"></i> 猜一下
+                            </button>
+                        </div>
+                        <div id="guessResult" class="result-area result-giant"></div>
+                        <div id="guessHistory" class="history-area history-large"></div>
+                        <button id="restartGuess" class="btn-secondary btn-large" style="display:none;">
+                            <i class="fas fa-redo"></i> 再玩一次
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 今天吃什么模块 -->
+            <div class="tab-panel" id="whatToEatPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🍽️</div>
+                    <h2 class="panel-title">今天吃什么</h2>
+                    <p class="panel-desc">选择你的口味偏好，让大福来帮你决定！</p>
+                </div>
+                <div class="panel-body">
+                    <div class="food-selection-area">
+                        <div class="food-options-large">
+                            <button class="food-tag-large" data-type="all">
+                                <span class="food-emoji">🍽️</span>
+                                <span>全部</span>
+                            </button>
+                            <button class="food-tag-large" data-type="spicy">
+                                <span class="food-emoji">🌶️</span>
+                                <span>辣</span>
+                            </button>
+                            <button class="food-tag-large" data-type="sweet">
+                                <span class="food-emoji">🍰</span>
+                                <span>甜</span>
+                            </button>
+                            <button class="food-tag-large" data-type="sour">
+                                <span class="food-emoji">🍋</span>
+                                <span>酸</span>
+                            </button>
+                            <button class="food-tag-large" data-type="light">
+                                <span class="food-emoji">🥗</span>
+                                <span>清淡</span>
+                            </button>
+                            <button class="food-tag-large" data-type="heavy">
+                                <span class="food-emoji">🍖</span>
+                                <span>重口味</span>
+                            </button>
+                        </div>
+                        <button id="decideFoodBtn" class="btn-primary btn-giant btn-magic">
+                            <i class="fas fa-magic"></i> 帮我决定！
+                        </button>
+                        <div id="foodResult" class="result-area result-giant result-food"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 运势占卜模块 -->
+            <div class="tab-panel" id="fortunePanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🔮</div>
+                    <h2 class="panel-title">小魔法猫咪的今日运势</h2>
+                    <p class="panel-desc">喵~ 让本喵来帮你看看今天的运势吧！</p>
+                </div>
+                <div class="panel-body">
+                    <div class="fortune-area">
+                        <div class="fortune-cat-large">
+                            <div class="cat-avatar-large">🐱</div>
+                            <div class="cat-bubble">
+                                <p class="cat-speech-large">点击下面的按钮，让我为你占卜吧！✨</p>
+                            </div>
+                        </div>
+                        <div class="fortune-buttons">
+                            <button class="fortune-btn-large" data-type="love">
+                                <span class="fortune-emoji">💕</span>
+                                <span>爱情运</span>
+                            </button>
+                            <button class="fortune-btn-large" data-type="career">
+                                <span class="fortune-emoji">💼</span>
+                                <span>事业运</span>
+                            </button>
+                            <button class="fortune-btn-large" data-type="wealth">
+                                <span class="fortune-emoji">💰</span>
+                                <span>财运</span>
+                            </button>
+                            <button class="fortune-btn-large" data-type="health">
+                                <span class="fortune-emoji">🌟</span>
+                                <span>健康运</span>
+                            </button>
+                        </div>
+                        <button id="generalFortuneBtn" class="btn-primary btn-giant btn-fortune">
+                            <i class="fas fa-star"></i> 查看今日综合运势
+                        </button>
+                        <div id="fortuneResult" class="result-area result-giant result-fortune-full"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 今日份福气模块 -->
+            <div class="tab-panel" id="blessingPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🧧</div>
+                    <h2 class="panel-title">今日份福气 🎀</h2>
+                    <p class="panel-desc">点击领取属于你的专属福气，让好运常伴左右</p>
+                </div>
+                <div class="panel-body">
+                    <div class="blessing-area">
+                        <div class="blessing-intro">
+                            <p class="blessing-intro-text">
+                                <span class="highlight">福</span>字代表着幸福、福气和好运<br>
+                                每一天都值得被祝福，每一份福气都独一无二<br>
+                                点击下方的按钮，领取你的<span class="highlight">今日份福气</span>吧！
+                            </p>
+                        </div>
+                        
+                        <button id="blessingBtn" class="btn-primary blessing-btn-giant">
+                            <span class="btn-fu">福</span>
+                            <span>点击领取今日份福气</span>
+                            <span class="btn-emoji">🎀</span>
+                        </button>
+                        
+                        <div id="blessingResult" class="blessing-result-area" style="display: none;"></div>
+                        
+                        <div id="blessingCounter" class="blessing-counter" style="display: none;">
+                            今日已领取 <span class="count">0</span> 份福气
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI聊天模块 -->
+            <div class="tab-panel" id="aiChatPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🤖</div>
+                    <h2 class="panel-title">AI 聊天助手</h2>
+                    <p class="panel-desc">有什么想聊的，随时告诉我吧！</p>
+                </div>
+                <div class="panel-body panel-full">
+                    <div class="chat-container-large">
+                        <div id="chatMessages" class="chat-messages-large">
+                            <div class="message system-message">
+                                <i class="fas fa-robot"></i>
+                                <span>你好！我是AI助手，有什么可以帮助你的吗？😊</span>
+                            </div>
+                        </div>
+                        <div class="chat-input-area-large">
+                            <textarea id="chatInput" placeholder="输入你想说的话，按Enter发送..." rows="3"></textarea>
+                            <button id="sendBtn" class="btn-send-large">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>发送</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据统计模块 -->
+            <div class="tab-panel" id="statisticsPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">📊</div>
+                    <h2 class="panel-title">数据统计中心</h2>
+                    <p class="panel-desc">记录每一个来访的你，感谢你的陪伴 💕</p>
+                </div>
+                <div class="panel-body">
+                    <div class="stats-area">
+                        <!-- 今日统计 -->
+                        <div class="stats-section">
+                            <h3 class="stats-title">
+                                <span class="stats-icon">📅</span>
+                                今日统计
+                                <span class="stats-badge">每日归零</span>
+                            </h3>
+                            <div class="stats-cards">
+                                <div class="stat-card">
+                                    <div class="stat-emoji">👥</div>
+                                    <div class="stat-label">今日访客</div>
+                                    <div class="stat-value" id="todayVisitors">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-emoji">👀</div>
+                                    <div class="stat-label">今日访问</div>
+                                    <div class="stat-value" id="todayVisits">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 总统计 -->
+                        <div class="stats-section">
+                            <h3 class="stats-title">
+                                <span class="stats-icon">🏆</span>
+                                总计统计
+                                <span class="stats-badge">上限999</span>
+                            </h3>
+                            <div class="stats-cards">
+                                <div class="stat-card total">
+                                    <div class="stat-emoji">🌟</div>
+                                    <div class="stat-label">总访客数</div>
+                                    <div class="stat-value" id="totalVisitors">0</div>
+                                </div>
+                                <div class="stat-card total">
+                                    <div class="stat-emoji">💫</div>
+                                    <div class="stat-label">总访问量</div>
+                                    <div class="stat-value" id="totalVisits">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 功能使用统计 -->
+                        <div class="stats-section">
+                            <h3 class="stats-title">
+                                <span class="stats-icon">🎮</span>
+                                功能使用次数
+                                <span class="stats-hint">今日 / 总计</span>
+                            </h3>
+                            <div class="module-stats-grid">
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🎲</span>
+                                    <span class="module-name">猜数字</span>
+                                    <span class="module-count" id="statGuessNumber">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🍜</span>
+                                    <span class="module-name">今天吃什么</span>
+                                    <span class="module-count" id="statWhatToEat">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🔮</span>
+                                    <span class="module-name">运势占卜</span>
+                                    <span class="module-count" id="statFortune">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🎀</span>
+                                    <span class="module-name">今日份福气</span>
+                                    <span class="module-count" id="statBlessing">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🤖</span>
+                                    <span class="module-name">AI聊天</span>
+                                    <span class="module-count" id="statAiChat">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 更新时间 -->
+                        <div class="stats-footer">
+                            <div class="update-time">
+                                <span class="update-icon">🕐</span>
+                                <span>数据最后更新时间：</span>
+                                <span id="lastUpdated" class="update-value">--</span>
+                            </div>
+                            <div class="stats-thanks">
+                                🎀 感谢每一位来访的你，让大福的玩具房充满温暖 🎀
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>Made with <i class="fas fa-heart"></i> by 大福 | 积木式架构，自由组合</p>
+        </footer>
+    </div>
+
+    <!-- 彩蛋触发器 - 伪装成装饰的按钮 -->
+    <button id="notAButton" class="easter-egg-trigger" title="都说了别点我啦！">
+        🌸 ~嘿嘿嘿别点我 o((>ω< ))o 🌸
+    </button>
+
+    <!-- 彩蛋模态框 -->
+    <div id="easterEggModal" class="easter-egg-modal">
+        <div class="easter-egg-content">
+            <div class="easter-egg-header">
+                <span class="easter-egg-title">mysterious_code.js</span>
+                <button id="closeEasterEgg" class="easter-egg-close">&times;</button>
+            </div>
+            <div id="codeOcean" class="code-ocean">
+                <!-- 代码海洋将在这里生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/tabs.js"></script>
+    <script src="js/gate.js"></script>
+    <script src="modules/statistics.js"></script>
+    <script src="modules/guessNumber.js"></script>
+    <script src="modules/whatToEat.js"></script>
+    <script src="modules/fortune.js"></script>
+    <script src="modules/blessing.js"></script>
+    <script src="modules/aiChat.js"></script>
+    <script src="modules/easterEgg.js"></script>
+</body>
+</html>
