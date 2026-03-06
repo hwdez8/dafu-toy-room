@@ -2032,3 +2032,132 @@ textarea {
         grid-template-columns: 1fr;
     }
 }
+
+/* ========================================
+   打地鼠游戏样式 🐹
+   ======================================== */
+
+.mole-game-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 20px;
+}
+
+.mole-stats {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 10px;
+}
+
+.mole-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.mole-stat-label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.mole-stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 60px;
+    text-align: center;
+}
+
+.mole-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 400px;
+    width: 100%;
+}
+
+.mole-hole {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    background: linear-gradient(135deg, #e8d5b7 0%, #d4c4a8 100%);
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+}
+
+.mole-hole:active {
+    transform: scale(0.95);
+}
+
+.mole {
+    position: absolute;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3rem;
+    transition: bottom 0.3s ease-out;
+    user-select: none;
+    pointer-events: none;
+}
+
+.mole-hole.up .mole {
+    bottom: 10%;
+}
+
+.mole-game-over {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--border-radius);
+    animation: fade-in 0.3s ease-out;
+}
+
+.mole-game-over-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.mole-game-over-emoji {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    animation: bounce 0.5s ease-in-out infinite;
+}
+
+.mole-game-over h3 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.mole-game-over p {
+    font-size: 1.2rem;
+    color: var(--text-color);
+}
+
+#moleFinalScore {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}

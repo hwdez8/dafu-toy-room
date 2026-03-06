@@ -24,7 +24,8 @@
                 whatToEat: 0,
                 fortune: 0,
                 blessing: 0,
-                aiChat: 0
+                aiChat: 0,
+                whackAMole: 0
             }
         },
         total: {
@@ -35,7 +36,8 @@
                 whatToEat: 0,
                 fortune: 0,
                 blessing: 0,
-                aiChat: 0
+                aiChat: 0,
+                whackAMole: 0
             },
             lastUpdated: null
         }
@@ -209,7 +211,7 @@
         }
         
         // 模块使用统计
-        var modules = ['guessNumber', 'whatToEat', 'fortune', 'blessing', 'aiChat'];
+        var modules = ['guessNumber', 'whatToEat', 'fortune', 'blessing', 'aiChat', 'whackAMole'];
         modules.forEach(function(moduleName) {
             var el = document.getElementById('stat' + moduleName.charAt(0).toUpperCase() + moduleName.slice(1));
             if (el) {

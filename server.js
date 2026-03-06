@@ -37,7 +37,8 @@ let serverStats = {
             whatToEat: 0,
             fortune: 0,
             blessing: 0,
-            aiChat: 0
+            aiChat: 0,
+            whackAMole: 0
         }
     },
     total: {
@@ -48,7 +49,8 @@ let serverStats = {
             whatToEat: 0,
             fortune: 0,
             blessing: 0,
-            aiChat: 0
+            aiChat: 0,
+            whackAMole: 0
         },
         lastUpdated: new Date().toISOString()
     }
@@ -79,7 +81,8 @@ function loadStats() {
                         whatToEat: 0,
                         fortune: 0,
                         blessing: 0,
-                        aiChat: 0
+                        aiChat: 0,
+                        whackAMole: 0
                     }
                 };
             }
@@ -124,7 +127,8 @@ function recordVisit(clientIP) {
                 whatToEat: 0,
                 fortune: 0,
                 blessing: 0,
-                aiChat: 0
+                aiChat: 0,
+                whackAMole: 0
             }
         };
     }
