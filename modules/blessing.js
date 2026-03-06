@@ -7,36 +7,36 @@
 (function() {
     'use strict';
     
-    // 本地祝福语数据库（API不可用时使用）
+    // 本地祝福语数据库（福福风格 - 伊布谐音梗）
     const BLESSING_DATABASE = [
-        { text: '福如东海，寿比南山', emoji: '🌊', desc: '愿你福气如东海般浩瀚' },
-        { text: '福星高照，万事如意', emoji: '⭐', desc: '福星照耀，事事顺心' },
-        { text: '五福临门，喜气洋洋', emoji: '🏠', desc: '五种福气齐聚你家门口' },
-        { text: '福气满满，好运连连', emoji: '🍀', desc: '福气充盈，好运不断' },
-        { text: '福至心灵，心想事成', emoji: '💫', desc: '福气到来，心想事竟成' },
+        { text: '福福祝大家福气满满', emoji: '�', desc: '福福带着满满的祝福来啦' },
+        { text: '多幸多福，快乐加倍', emoji: '✨', desc: '幸运和福气都给你' },
+        { text: '年年有福，岁岁平安', emoji: '🧧', desc: '每年都有福气相伴' },
+        { text: '福来运转，好事连连', emoji: '🍀', desc: '福气一来，运气都变好了' },
+        { text: '福气满满，幸福安康', emoji: '�', desc: '福福希望你幸福满满' },
+        { text: '福福贴贴，好运附体', emoji: '🤗', desc: '和福福贴贴，好运自然来' },
+        { text: '有福同享，有难同当', emoji: '🤝', desc: '福福陪你一起度过每一天' },
+        { text: '伊起享福，快乐无边', emoji: '�', desc: '和伊布一起享受福气吧' },
+        { text: '福如东海，寿比南山', emoji: '🌊', desc: '福气如海，寿命如山' },
+        { text: '福星高照，万事顺遂', emoji: '⭐', desc: '福星守护着你' },
+        { text: '五福临门，喜气洋洋', emoji: '🏠', desc: '五种福气齐聚你家' },
+        { text: '福至心灵，心想事成', emoji: '💫', desc: '福气到了，心想事竟成' },
         { text: '福寿安康，笑口常开', emoji: '😊', desc: '健康平安，笑容常在' },
-        { text: '福禄双全，财源广进', emoji: '💰', desc: '福气和禄位双双丰收' },
-        { text: '福慧双修，吉祥如意', emoji: '🙏', desc: '福气和智慧同步增长' },
-        { text: '福缘深厚，贵人相助', emoji: '🤝', desc: '福缘深厚，有贵人扶持' },
+        { text: '福禄双全，财源广进', emoji: '�', desc: '福气和财运一起来' },
+        { text: '福慧双修，吉祥如意', emoji: '�', desc: '福气和智慧同步增长' },
+        { text: '福缘深厚，贵人相助', emoji: '🌟', desc: '福缘深厚，有贵人扶持' },
         { text: '福泽绵长，世代兴旺', emoji: '🌳', desc: '福泽流传，家族兴旺' },
         { text: '福运亨通，步步高升', emoji: '📈', desc: '福运顺畅，步步高升' },
-        { text: '福气东来，紫气西迎', emoji: '🌅', desc: '祥瑞之气从东方而来' },
-        { text: '福满乾坤，喜乐安康', emoji: '🌈', desc: '福气充满天地，喜乐平安' },
-        { text: '福善积德，天佑良人', emoji: '👼', desc: '积德行善，上天庇佑' },
-        { text: '福星拱照，灾祸远离', emoji: '🛡️', desc: '福星守护，远离灾祸' },
-        { text: '福慧圆满，人生顺遂', emoji: '✨', desc: '福慧圆满，人生顺利' },
-        { text: '福乐无边，幸福永远', emoji: '💕', desc: '福乐无穷，幸福长存' },
-        { text: '福寿齐天，岁岁平安', emoji: '🎂', desc: '福寿与天齐，年年平安' },
-        { text: '福瑞祥和，家宅安宁', emoji: '🏡', desc: '祥瑞和谐，家宅平安' },
-        { text: '福喜盈门，好事成双', emoji: '🎉', desc: '福气和喜气充满家门' }
+        { text: '福气东来，紫气西迎', emoji: '�', desc: '祥瑞之气从东方而来' },
+        { text: '福满乾坤，喜乐安康', emoji: '�', desc: '福气充满天地，喜乐平安' }
     ];
     
     // 配置
     const CONFIG = {
         // API端点（用于生成祝福语，防止词穷）
         apiEndpoint: '/api/blessing',
-        // 是否优先使用API
-        useApiFirst: true,
+        // 是否优先使用API（当前使用本地福福风格数据库）
+        useApiFirst: false,
         // API超时时间
         apiTimeout: 5000
     };
