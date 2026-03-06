@@ -631,6 +631,8 @@ function setSecurityHeaders(res) {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     // 权限策略
     res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    // HSTS - 强制HTTPS（提升到A+级）
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
 }
 
 // 获取客户端IP
