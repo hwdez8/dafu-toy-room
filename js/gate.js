@@ -153,9 +153,20 @@
         const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
         const targetPanel = document.getElementById(`${tabId}Panel`);
         
-        if (targetBtn && targetPanel) {
-            targetBtn.classList.add('active');
+        if (targetPanel) {
+            // 激活面板
             targetPanel.classList.add('active');
+            
+            // 如果有对应的按钮，也激活它
+            if (targetBtn) {
+                targetBtn.classList.add('active');
+            }
+        } else {
+            // 如果找不到对应面板，默认显示第一个面板
+            const firstPanel = document.querySelector('.tab-panel');
+            const firstBtn = elements.tabButtons[0];
+            if (firstPanel) firstPanel.classList.add('active');
+            if (firstBtn) firstBtn.classList.add('active');
         }
     }
     

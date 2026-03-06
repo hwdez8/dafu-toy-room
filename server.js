@@ -88,7 +88,10 @@ function loadStats() {
                         fortune: 0,
                         blessing: 0,
                         aiChat: 0,
-                        whackAMole: 0
+                        whackAMole: 0,
+                        luckyWheel: 0,
+                        passwordGen: 0,
+                        moodDiary: 0
                     }
                 };
             }
@@ -134,7 +137,10 @@ function recordVisit(clientIP) {
                 fortune: 0,
                 blessing: 0,
                 aiChat: 0,
-                whackAMole: 0
+                whackAMole: 0,
+                luckyWheel: 0,
+                passwordGen: 0,
+                moodDiary: 0
             }
         };
     }
