@@ -74,19 +74,22 @@
                     <div class="gate-card-emoji">💬 😊 🌈</div>
                 </div>
 
-                <div class="gate-card" data-game="statistics">
-                    <div class="gate-card-icon">📊</div>
-                    <h3 class="gate-card-title">数据统计</h3>
-                    <p class="gate-card-desc">看看有多少人来过大福的玩具房</p>
-                    <div class="gate-card-emoji">📈 🎉 🏆</div>
-                </div>
-
                 <div class="gate-card" data-game="whackAMole">
                     <div class="gate-card-icon">🐹</div>
                     <h3 class="gate-card-title">打地鼠</h3>
                     <p class="gate-card-desc">快速点击地鼠，挑战你的手速！</p>
                     <div class="gate-card-emoji">🔨 🐹 ⭐</div>
                 </div>
+            </div>
+
+            <!-- 大门统计横幅 -->
+            <div class="gate-stats-banner" onclick="GateController.enterGame('statistics')">
+                <div class="gate-stats-banner-content">
+                    <span class="gate-stats-banner-icon">📊</span>
+                    <span class="gate-stats-banner-text">查看数据统计</span>
+                    <span class="gate-stats-banner-arrow">→</span>
+                </div>
+                <div class="gate-stats-banner-glow"></div>
             </div>
 
             <!-- 大门底部 -->
@@ -117,12 +120,13 @@
             <p class="sub-title">🎀 欢迎来到大福的网站，随便逛逛玩玩吧XD 🎀</p>
             
             <!-- 数据统计横幅 -->
-            <div class="stats-banner" onclick="GateController.enterGame('statistics')">
+            <div class="stats-banner" onclick="TabManager.switchTab('statistics')">
                 <div class="stats-banner-content">
                     <span class="stats-banner-icon">📊</span>
                     <span class="stats-banner-text">查看数据统计</span>
-                    <span class="stats-banner-badge">C位</span>
+                    <span class="stats-banner-arrow">→</span>
                 </div>
+                <div class="stats-banner-glow"></div>
             </div>
         </header>
 

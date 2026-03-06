@@ -59,11 +59,10 @@
             
             hole.appendChild(mole);
             elements.grid.appendChild(hole);
-            
-            // 绑定点击事件到地洞
-            hole.addEventListener('click', () => whack(i));
-            
             elements.holes.push({ hole, mole, isUp: false });
+            
+            // 点击事件绑定在地洞上
+            hole.addEventListener('click', () => whack(i));
         }
     }
     

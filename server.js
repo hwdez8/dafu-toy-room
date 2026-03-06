@@ -67,15 +67,7 @@ function loadStats() {
             if (data.today && data.today.date === today) {
                 serverStats.today = {
                     ...data.today,
-                    visitorIPs: new Set(data.today.visitorIPs || []),
-                    moduleUsage: {
-                        guessNumber: data.today.moduleUsage?.guessNumber || 0,
-                        whatToEat: data.today.moduleUsage?.whatToEat || 0,
-                        fortune: data.today.moduleUsage?.fortune || 0,
-                        blessing: data.today.moduleUsage?.blessing || 0,
-                        aiChat: data.today.moduleUsage?.aiChat || 0,
-                        whackAMole: data.today.moduleUsage?.whackAMole || 0
-                    }
+                    visitorIPs: new Set(data.today.visitorIPs || [])
                 };
             } else {
                 // 新的一天，重置今日统计
@@ -95,20 +87,7 @@ function loadStats() {
                 };
             }
             
-            // 确保 total 也有 whackAMole 字段
-            if (data.total) {
-                serverStats.total = {
-                    ...data.total,
-                    moduleUsage: {
-                        guessNumber: data.total.moduleUsage?.guessNumber || 0,
-                        whatToEat: data.total.moduleUsage?.whatToEat || 0,
-                        fortune: data.total.moduleUsage?.fortune || 0,
-                        blessing: data.total.moduleUsage?.blessing || 0,
-                        aiChat: data.total.moduleUsage?.aiChat || 0,
-                        whackAMole: data.total.moduleUsage?.whackAMole || 0
-                    }
-                };
-            }
+            serverStats.total = data.total || serverStats.total;
             log('统计数据已加载');
         }
     } catch (error) {
