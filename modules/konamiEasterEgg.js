@@ -160,6 +160,11 @@
                 overflow: hidden;
                 cursor: crosshair;
                 touch-action: none;
+                pointer-events: none;
+            }
+            
+            .konami-game > * {
+                pointer-events: auto;
             }
             
             .konami-score {
@@ -234,7 +239,11 @@
             }
             
             .sylveon-fall.pop {
-                animation: sylveon-pop 0.3s ease-out forwards !important;
+                animation: none !important;
+                transition: all 0.3s ease-out;
+                transform: scale(1.5) !important;
+                opacity: 0;
+                pointer-events: none;
             }
             
             @keyframes sylveon-fall-anim {
