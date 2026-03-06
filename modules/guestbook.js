@@ -321,7 +321,8 @@
                 background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
                 color: white;
                 border: none;
-                font-size: 1.5rem;
+                font-size: 2rem;
+                line-height: 1;
                 cursor: pointer;
                 box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
                 transition: transform 0.3s, box-shadow 0.3s;
@@ -371,7 +372,7 @@
                 .guestbook-float-btn {
                     width: 50px;
                     height: 50px;
-                    font-size: 1.2rem;
+                    font-size: 1.5rem;
                     bottom: 20px;
                     left: 20px;
                 }
