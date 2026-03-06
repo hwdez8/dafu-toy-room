@@ -259,6 +259,18 @@ function canGuestbookToday(ip) {
 }
 
 // 提交留言
+// XSS 过滤函数
+function sanitizeInput(input) {
+    if (!input) return '';
+    return input
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/\//g, '&#x2F;');
+}
+
 function handleGuestbookPost(req, res) {
     const clientIP = getClientIP(req);
     const isAdminUser = isAdmin(req);
@@ -285,7 +297,10 @@ function handleGuestbookPost(req, res) {
     req.on('end', () => {
         try {
             const data = JSON.parse(body);
-            const content = data.content?.trim();
+            const rawContent = data.content?.trim();
+            
+            // XSS 过滤
+            const content = sanitizeInput(rawContent);
             
             // 验证内容
             if (!content || content.length < 2) {
