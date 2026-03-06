@@ -160,13 +160,11 @@ function handleStatsAPI(req, res) {
                      req.connection.remoteAddress || 
                      req.socket.remoteAddress;
     
+    log(`统计API请求: ${req.method} from ${clientIP}`);
+    
     if (req.method === 'GET') {
         // 返回统计数据
-        res.writeHead(200, { 
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        });
-        res.end(JSON.stringify({
+        const responseData = {
             today: {
                 date: serverStats.today.date,
                 uniqueVisitors: serverStats.today.uniqueVisitors,
@@ -174,10 +172,19 @@ function handleStatsAPI(req, res) {
                 moduleUsage: serverStats.today.moduleUsage
             },
             total: serverStats.total
-        }));
+        };
+        
+        log(`返回统计数据: 今日访客=${responseData.today.uniqueVisitors}, 总访客=${responseData.total.uniqueVisitors}`);
+        
+        res.writeHead(200, { 
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        });
+        res.end(JSON.stringify(responseData));
     } else if (req.method === 'POST') {
         // 记录访问
         recordVisit(clientIP);
+        log(`记录访问成功，IP: ${clientIP}`);
         
         res.writeHead(200, { 
             'Content-Type': 'application/json',
@@ -195,8 +202,10 @@ function handleModuleStatsAPI(req, res) {
         req.on('end', () => {
             try {
                 const data = JSON.parse(body);
+                log(`模块使用API: ${data.module}`);
                 if (data.module) {
                     recordModuleUsage(data.module);
+                    log(`模块使用记录成功: ${data.module}`);
                 }
                 res.writeHead(200, { 
                     'Content-Type': 'application/json',
@@ -204,6 +213,7 @@ function handleModuleStatsAPI(req, res) {
                 });
                 res.end(JSON.stringify({ success: true }));
             } catch (e) {
+                log(`模块使用API错误: ${e.message}`, 'error');
                 res.writeHead(400, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Invalid data' }));
             }

@@ -218,9 +218,13 @@
         });
         
         // 最后更新时间
-        if (elements.lastUpdated && stats.total.lastUpdated) {
-            const date = new Date(stats.total.lastUpdated);
-            elements.lastUpdated.textContent = formatDateTime(date);
+        if (elements.lastUpdated) {
+            if (stats.total.lastUpdated) {
+                const date = new Date(stats.total.lastUpdated);
+                elements.lastUpdated.textContent = formatDateTime(date);
+            } else {
+                elements.lastUpdated.textContent = '暂无更新记录';
+            }
         }
         
         console.log('📊 显示更新完成');
