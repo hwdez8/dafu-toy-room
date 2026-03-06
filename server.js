@@ -1176,14 +1176,18 @@ const server = http.createServer((req, res) => {
     
     // 增加连接计数
     activeConnections++;
+    let connectionClosed = false;
     
-    // 请求结束时减少计数
-    res.on('finish', () => {
-        activeConnections--;
-    });
-    res.on('close', () => {
-        activeConnections--;
-    });
+    // 请求结束时减少计数（确保只减一次）
+    const decreaseConnection = () => {
+        if (!connectionClosed) {
+            connectionClosed = true;
+            activeConnections--;
+        }
+    };
+    
+    res.on('finish', decreaseConnection);
+    res.on('close', decreaseConnection);
     
     // 设置安全响应头
     setSecurityHeaders(res);
@@ -1266,20 +1270,6 @@ const server = http.createServer((req, res) => {
             'getClientIP()': getClientIP(req),
             'isAdmin': isAdmin(req)
         }));
-        return;
-    }
-    
-    // 测试限流页面
-    if (pathname === '/test-rate-limit') {
-        res.writeHead(429, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(getRateLimitPage());
-        return;
-    }
-    
-    // 测试繁忙页面
-    if (pathname === '/test-busy') {
-        res.writeHead(503, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end(getBusyPage());
         return;
     }
     
