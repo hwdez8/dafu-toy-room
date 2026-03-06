@@ -875,6 +875,31 @@ function generateBlessing(req, res) {
 // 简单的速率限制存储
 const rateLimitMap = new Map();
 
+// 定期清理过期的速率限制记录（每10分钟）
+setInterval(() => {
+    const now = Date.now();
+    const windowStart = now - CONFIG.rateLimitWindow;
+    let cleanedCount = 0;
+    
+    for (const [ip, requests] of rateLimitMap.entries()) {
+        // 清理过期请求
+        const validRequests = requests.filter(time => time > windowStart);
+        
+        if (validRequests.length === 0) {
+            // 如果没有有效请求，删除该IP记录
+            rateLimitMap.delete(ip);
+            cleanedCount++;
+        } else {
+            // 更新记录
+            rateLimitMap.set(ip, validRequests);
+        }
+    }
+    
+    if (cleanedCount > 0) {
+        log(`清理速率限制记录: ${cleanedCount} 个IP`);
+    }
+}, 10 * 60 * 1000); // 10分钟
+
 // 留言限制存储 - 记录每个IP最后一次留言日期
 const guestbookLimitMap = new Map();
 
@@ -1153,10 +1178,17 @@ function setSecurityHeaders(res) {
 
 // 获取客户端IP
 function getClientIP(req) {
-    return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
-           req.connection.remoteAddress || 
-           req.socket.remoteAddress ||
-           'unknown';
+    // 优先使用直接连接的IP（防止X-Forwarded-For伪造）
+    // 只有在有可信代理时才使用X-Forwarded-For
+    const directIP = req.connection.remoteAddress || req.socket.remoteAddress;
+    
+    // 如果直接IP是内网或本地，尝试从代理头获取（VPS通常直接暴露）
+    if (directIP && (directIP.startsWith('127.') || directIP.startsWith('10.') || directIP.startsWith('192.168.') || directIP === '::1' || directIP === '::ffff:127.0.0.1')) {
+        const forwarded = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+        if (forwarded) return forwarded;
+    }
+    
+    return directIP || 'unknown';
 }
 
 // 全局连接计数器
@@ -1197,7 +1229,7 @@ const server = http.createServer((req, res) => {
         res.writeHead(429, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(getRateLimitPage());
         log(`速率限制触发: ${clientIP}`, 'error');
-        activeConnections--;
+        // 注意：不要在这里减 activeConnections，让 finish/close 事件处理
         return;
     }
     
