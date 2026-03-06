@@ -1,20 +1,11 @@
 /**
  * 管理员模块 🔐
  * 积木式架构 - 可独立删除或替换
- * 功能：点击版本号10次+密码进入管理面板，审核/删除留言
  */
 
 (function() {
     'use strict';
     
-    // 配置
-    const CONFIG = {
-        apiEndpoint: '/api/admin',
-        clickThreshold: 10,
-        clickTimeout: 5000  // 5秒内点击10次
-    };
-    
-    // 状态
     let clickCount = 0;
     let lastClickTime = 0;
     let isAdmin = false;
@@ -32,205 +23,54 @@
                     <h3>🔐 管理面板</h3>
                     <button class="admin-close" onclick="closeAdminPanel()">✕</button>
                 </div>
-                
                 <div class="admin-tabs">
-                    <button class="admin-tab ${currentTab === 'pending' ? 'active' : ''}" onclick="switchAdminTab('pending')">
-                        ⏳ 待审核
-                    </button>
-                    <button class="admin-tab ${currentTab === 'approved' ? 'active' : ''}" onclick="switchAdminTab('approved')">
-                        ✅ 已发布
-                    </button>
+                    <button class="admin-tab ${currentTab === 'pending' ? 'active' : ''}" onclick="switchAdminTab('pending')">⏳ 待审核</button>
+                    <button class="admin-tab ${currentTab === 'approved' ? 'active' : ''}" onclick="switchAdminTab('approved')">✅ 已发布</button>
                 </div>
-                
-                <div class="admin-content" id="adminContent">
-                    加载中...
-                </div>
+                <div class="admin-content" id="adminContent">加载中...</div>
             </div>
         `;
-        
         document.body.appendChild(panel);
         addAdminStyles();
-        loadAdminData();
     }
     
-    // 添加样式
     function addAdminStyles() {
         const styles = `
-            .admin-panel {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 10000;
-                display: none;
-            }
-            
-            .admin-panel.show {
-                display: block;
-            }
-            
-            .admin-overlay {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-            }
-            
-            .admin-container {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: white;
-                border-radius: 20px;
-                width: 90%;
-                max-width: 600px;
-                max-height: 80vh;
-                overflow: hidden;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            }
-            
-            .admin-header {
-                background: linear-gradient(135deg, #ff6b9d, #ff8fab);
-                color: white;
-                padding: 20px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            
-            .admin-header h3 {
-                margin: 0;
-                font-size: 1.3rem;
-            }
-            
-            .admin-close {
-                background: none;
-                border: none;
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                padding: 5px;
-            }
-            
-            .admin-tabs {
-                display: flex;
-                border-bottom: 2px solid #f0f0f0;
-            }
-            
-            .admin-tab {
-                flex: 1;
-                padding: 15px;
-                border: none;
-                background: none;
-                cursor: pointer;
-                font-size: 1rem;
-                transition: all 0.3s;
-            }
-            
-            .admin-tab.active {
-                background: #fff5f7;
-                color: #ff6b9d;
-                font-weight: bold;
-            }
-            
-            .admin-content {
-                padding: 20px;
-                max-height: 50vh;
-                overflow-y: auto;
-            }
-            
-            .admin-item {
-                background: #f8f8f8;
-                border-radius: 10px;
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .admin-item p {
-                margin: 0 0 10px 0;
-                color: #333;
-            }
-            
-            .admin-meta {
-                font-size: 0.85rem;
-                color: #999;
-                margin-bottom: 10px;
-            }
-            
-            .admin-actions {
-                display: flex;
-                gap: 10px;
-            }
-            
-            .admin-actions button {
-                padding: 8px 15px;
-                border: none;
-                border-radius: 20px;
-                cursor: pointer;
-                font-size: 0.9rem;
-                transition: all 0.3s;
-            }
-            
-            .btn-approve {
-                background: #a8e6cf;
-                color: #2d6a4f;
-            }
-            
-            .btn-delete {
-                background: #ffc2d1;
-                color: #9d4edd;
-            }
-            
-            .admin-empty {
-                text-align: center;
-                padding: 40px;
-                color: #999;
-            }
-            
-            .admin-password {
-                text-align: center;
-                padding: 40px;
-            }
-            
-            .admin-password input {
-                padding: 12px 20px;
-                border: 2px solid #ffc2d1;
-                border-radius: 25px;
-                font-size: 1rem;
-                width: 200px;
-                margin-bottom: 15px;
-            }
-            
-            .admin-password button {
-                padding: 12px 30px;
-                background: linear-gradient(135deg, #ff6b9d, #ff8fab);
-                color: white;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                font-size: 1rem;
-            }
+            .admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; display: none; }
+            .admin-panel.show { display: block; }
+            .admin-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+            .admin-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+            .admin-header { background: linear-gradient(135deg, #ff6b9d, #ff8fab); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+            .admin-header h3 { margin: 0; font-size: 1.3rem; }
+            .admin-close { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+            .admin-tabs { display: flex; border-bottom: 2px solid #f0f0f0; }
+            .admin-tab { flex: 1; padding: 15px; border: none; background: none; cursor: pointer; font-size: 1rem; }
+            .admin-tab.active { background: #fff5f7; color: #ff6b9d; font-weight: bold; }
+            .admin-content { padding: 20px; max-height: 50vh; overflow-y: auto; }
+            .admin-item { background: #f8f8f8; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+            .admin-item p { margin: 0 0 10px 0; color: #333; }
+            .admin-meta { font-size: 0.85rem; color: #999; margin-bottom: 10px; }
+            .admin-actions { display: flex; gap: 10px; }
+            .admin-actions button { padding: 8px 15px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.9rem; }
+            .btn-approve { background: #a8e6cf; color: #2d6a4f; }
+            .btn-delete { background: #ffc2d1; color: #9d4edd; }
+            .admin-empty { text-align: center; padding: 40px; color: #999; }
+            .admin-password { text-align: center; padding: 40px; }
+            .admin-password input { padding: 12px 20px; border: 2px solid #ffc2d1; border-radius: 25px; font-size: 1rem; width: 200px; margin-bottom: 15px; }
+            .admin-password button { padding: 12px 30px; background: linear-gradient(135deg, #ff6b9d, #ff8fab); color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 1rem; }
         `;
-        
         const styleSheet = document.createElement('style');
         styleSheet.textContent = styles;
         document.head.appendChild(styleSheet);
     }
     
-    // 加载管理数据
     async function loadAdminData() {
         const content = document.getElementById('adminContent');
-        
         if (!isAdmin) {
             content.innerHTML = `
                 <div class="admin-password">
                     <p>🎉 彩蛋触发！请输入密码</p>
-                    <input type="password" id="adminPassword" placeholder="输入密码">
-                    <br>
+                    <input type="password" id="adminPassword" placeholder="输入密码"><br>
                     <button onclick="checkAdminPassword()">进入管理面板</button>
                 </div>
             `;
@@ -239,7 +79,7 @@
         
         try {
             const endpoint = currentTab === 'pending' ? '/pending' : '/approved';
-            const res = await fetch(`${CONFIG.apiEndpoint}${endpoint}`);
+            const res = await fetch(`/api/admin${endpoint}`);
             const data = await res.json();
             
             if (!data.success) {
@@ -248,7 +88,6 @@
             }
             
             const messages = data.messages || [];
-            
             if (messages.length === 0) {
                 content.innerHTML = `<div class="admin-empty">${currentTab === 'pending' ? '没有待审核的留言' : '没有已发布的留言'}</div>`;
                 return;
@@ -256,35 +95,28 @@
             
             content.innerHTML = messages.map(msg => `
                 <div class="admin-item">
-                    <p>${escapeHtml(msg.content)}</p>
-                    <div class="admin-meta">
-                        IP: ${msg.ip} | ${msg.date} ${msg.time}
-                    </div>
+                    <p>${msg.content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                    <div class="admin-meta">IP: ${msg.ip} | ${msg.date} ${msg.time}</div>
                     <div class="admin-actions">
-                        ${currentTab === 'pending' ? `<button class="btn-approve" onclick="handleMessage('${msg.id}', 'approve')">✅ 通过</button>` : ''}
-                        <button class="btn-delete" onclick="handleMessage('${msg.id}', 'delete')">🗑️ 删除</button>
+                        ${currentTab === 'pending' ? `<button class="btn-approve" onclick="handleMessage(${msg.id}, 'approve')">✅ 通过</button>` : ''}
+                        <button class="btn-delete" onclick="handleMessage(${msg.id}, 'delete')">🗑️ 删除</button>
                     </div>
                 </div>
             `).join('');
-            
         } catch (e) {
-            content.innerHTML = '<div class="admin-empty">加载失败，请重试</div>';
+            content.innerHTML = '<div class="admin-empty">加载失败</div>';
         }
     }
     
-    // 检查密码
     window.checkAdminPassword = async function() {
         const password = document.getElementById('adminPassword').value;
-        
         try {
-            const res = await fetch(`${CONFIG.apiEndpoint}/check`, {
+            const res = await fetch('/api/admin/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password })
             });
-            
             const data = await res.json();
-            
             if (data.isAdmin) {
                 isAdmin = true;
                 loadAdminData();
@@ -292,18 +124,19 @@
                 alert('密码错误！');
             }
         } catch (e) {
-            alert('验证失败，请重试');
+            alert('验证失败');
         }
     };
     
-    // 切换标签
     window.switchAdminTab = function(tab) {
         currentTab = tab;
+        const panel = document.getElementById('adminPanel');
+        if (panel) panel.remove();
         createAdminPanel();
+        document.getElementById('adminPanel').classList.add('show');
         loadAdminData();
     };
     
-    // 关闭面板
     window.closeAdminPanel = function() {
         const panel = document.getElementById('adminPanel');
         if (panel) {
@@ -313,91 +146,58 @@
         }
     };
     
-    // 处理留言
     window.handleMessage = async function(id, action) {
-        const actionText = action === 'approve' ? '通过' : '删除';
-        if (!confirm(`确定要${actionText}这条留言吗？`)) return;
-        
+        if (!confirm(`确定要${action === 'approve' ? '通过' : '删除'}这条留言吗？`)) return;
         try {
-            const res = await fetch(`${CONFIG.apiEndpoint}/message/${id}`, {
+            const res = await fetch(`/api/admin/message/${id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action })
             });
-            
             const data = await res.json();
-            
             if (data.success) {
-                alert(`${actionText}成功！`);
+                alert('操作成功！');
                 loadAdminData();
             } else {
                 alert(data.error || '操作失败');
             }
         } catch (e) {
-            alert('操作失败，请重试');
+            alert('操作失败');
         }
     };
     
-    // HTML转义
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-    
-    // 绑定版本号点击
-    function bindVersionClick() {
+    function init() {
         const version = document.querySelector('.version');
         if (!version) {
-            console.log('⚠️ 未找到版本号元素');
+            console.log('未找到版本号元素');
             return;
         }
         
         version.style.cursor = 'pointer';
         version.title = '点我10次有惊喜~';
         
-        version.addEventListener('click', () => {
+        version.addEventListener('click', function() {
             const now = Date.now();
-            
-            if (now - lastClickTime > CONFIG.clickTimeout) {
-                clickCount = 0;
-            }
-            
+            if (now - lastClickTime > 5000) clickCount = 0;
             clickCount++;
             lastClickTime = now;
+            console.log('点击:', clickCount);
             
-            console.log(`点击版本号: ${clickCount}/${CONFIG.clickThreshold}`);
-            
-            if (clickCount >= CONFIG.clickThreshold) {
+            if (clickCount >= 10) {
                 clickCount = 0;
-                console.log('🎉 彩蛋触发！打开管理面板');
-                const panel = document.getElementById('adminPanel');
-                if (panel) {
-                    panel.classList.add('show');
-                    loadAdminData();
-                } else {
-                    createAdminPanel();
-                    document.getElementById('adminPanel').classList.add('show');
-                }
+                console.log('触发管理面板');
+                let panel = document.getElementById('adminPanel');
+                if (!panel) createAdminPanel();
+                document.getElementById('adminPanel').classList.add('show');
+                loadAdminData();
             }
         });
-    }
-    
-    // 初始化
-    function init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', bindVersionClick);
-        } else {
-            bindVersionClick();
-        }
         
-        console.log('🔐 管理员模块已加载！');
-        console.log('💡 点击版本号10次进入管理面板');
+        console.log('管理员模块已加载');
     }
     
-    // 注册模块
-    if (window.DafuToyRoom && window.DafuToyRoom.ModuleRegistry) {
-        window.DafuToyRoom.ModuleRegistry.register('admin', init);
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
