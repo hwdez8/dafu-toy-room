@@ -38,7 +38,10 @@ let serverStats = {
             fortune: 0,
             blessing: 0,
             aiChat: 0,
-            whackAMole: 0
+            whackAMole: 0,
+            luckyWheel: 0,
+            passwordGen: 0,
+            moodDiary: 0
         }
     },
     total: {
@@ -50,7 +53,10 @@ let serverStats = {
             fortune: 0,
             blessing: 0,
             aiChat: 0,
-            whackAMole: 0
+            whackAMole: 0,
+            luckyWheel: 0,
+            passwordGen: 0,
+            moodDiary: 0
         },
         lastUpdated: new Date().toISOString()
     }

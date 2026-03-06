@@ -25,7 +25,10 @@
                 fortune: 0,
                 blessing: 0,
                 aiChat: 0,
-                whackAMole: 0
+                whackAMole: 0,
+                luckyWheel: 0,
+                passwordGen: 0,
+                moodDiary: 0
             }
         },
         total: {
@@ -37,7 +40,10 @@
                 fortune: 0,
                 blessing: 0,
                 aiChat: 0,
-                whackAMole: 0
+                whackAMole: 0,
+                luckyWheel: 0,
+                passwordGen: 0,
+                moodDiary: 0
             },
             lastUpdated: null
         }
@@ -211,7 +217,7 @@
         }
         
         // 模块使用统计
-        var modules = ['guessNumber', 'whatToEat', 'fortune', 'blessing', 'aiChat', 'whackAMole'];
+        var modules = ['guessNumber', 'whatToEat', 'fortune', 'blessing', 'aiChat', 'whackAMole', 'luckyWheel', 'passwordGen', 'moodDiary'];
         modules.forEach(function(moduleName) {
             var el = document.getElementById('stat' + moduleName.charAt(0).toUpperCase() + moduleName.slice(1));
             if (el) {

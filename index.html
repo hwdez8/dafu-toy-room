@@ -80,6 +80,27 @@
                     <p class="gate-card-desc">快速点击地鼠，挑战你的手速！</p>
                     <div class="gate-card-emoji">🔨 🐹 ⭐</div>
                 </div>
+
+                <div class="gate-card" data-game="luckyWheel">
+                    <div class="gate-card-icon">🎡</div>
+                    <h3 class="gate-card-title">幸运转盘</h3>
+                    <p class="gate-card-desc">转动转盘，让命运决定！</p>
+                    <div class="gate-card-emoji">🎯 🎲 ⭐</div>
+                </div>
+
+                <div class="gate-card" data-game="passwordGen">
+                    <div class="gate-card-icon">🔐</div>
+                    <h3 class="gate-card-title">密码生成</h3>
+                    <p class="gate-card-desc">生成安全密码，保护账户安全</p>
+                    <div class="gate-card-emoji">🔑 🔒 🔓</div>
+                </div>
+
+                <div class="gate-card" data-game="moodDiary">
+                    <div class="gate-card-icon">📔</div>
+                    <h3 class="gate-card-title">心情日记</h3>
+                    <p class="gate-card-desc">记录每日心情，留住美好时光</p>
+                    <div class="gate-card-emoji">😊 😌 🥰</div>
+                </div>
             </div>
 
             <!-- 大门统计横幅 -->
@@ -174,6 +195,21 @@
                 <i class="fas fa-robot"></i>
                 <span>AI聊天</span>
                 <span class="tab-emoji">🤖</span>
+            </button>
+            <button class="tab-btn" data-tab="luckyWheel">
+                <i class="fas fa-dharmachakra"></i>
+                <span>幸运转盘</span>
+                <span class="tab-emoji">🎡</span>
+            </button>
+            <button class="tab-btn" data-tab="passwordGen">
+                <i class="fas fa-key"></i>
+                <span>密码生成</span>
+                <span class="tab-emoji">🔐</span>
+            </button>
+            <button class="tab-btn" data-tab="moodDiary">
+                <i class="fas fa-book"></i>
+                <span>心情日记</span>
+                <span class="tab-emoji">📔</span>
             </button>
             <button class="tab-btn" data-tab="whackAMole">
                 <i class="fas fa-hammer"></i>
@@ -459,6 +495,27 @@
                                         <span class="stat-today">0</span> / <span class="stat-total">0</span>
                                     </span>
                                 </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🎡</span>
+                                    <span class="module-name">幸运转盘</span>
+                                    <span class="module-count" id="statLuckyWheel">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">🔐</span>
+                                    <span class="module-name">密码生成</span>
+                                    <span class="module-count" id="statPasswordGen">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
+                                <div class="module-stat-item">
+                                    <span class="module-icon">📔</span>
+                                    <span class="module-name">心情日记</span>
+                                    <span class="module-count" id="statMoodDiary">
+                                        <span class="stat-today">0</span> / <span class="stat-total">0</span>
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
@@ -472,6 +529,106 @@
                             <div class="stats-thanks">
                                 🎀 感谢每一位来访的你，让大福的玩具房充满温暖 🎀
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 幸运转盘模块 -->
+            <div class="tab-panel" id="luckyWheelPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🎡</div>
+                    <h2 class="panel-title">幸运转盘</h2>
+                    <p class="panel-desc">转动转盘，让命运决定你的选择！</p>
+                </div>
+                <div class="panel-body">
+                    <div class="wheel-area">
+                        <div class="wheel-container">
+                            <canvas id="luckyWheel" width="300" height="300"></canvas>
+                            <div class="wheel-pointer" id="wheelPointer">▼</div>
+                        </div>
+                        <div class="wheel-templates">
+                            <button class="wheel-template-btn active" data-template="default">运势</button>
+                            <button class="wheel-template-btn" data-template="eat">吃什么</button>
+                            <button class="wheel-template-btn" data-template="yesno">是/否</button>
+                            <button class="wheel-template-btn" data-template="activity">活动</button>
+                        </div>
+                        <div class="wheel-custom">
+                            <textarea id="wheelCustomInput" placeholder="自定义选项，用逗号或换行分隔&#10;例如：选项1, 选项2, 选项3"></textarea>
+                            <button id="setCustomWheelBtn" class="btn-secondary">应用自定义</button>
+                        </div>
+                        <button id="spinWheelBtn" class="btn-primary btn-giant">
+                            <i class="fas fa-sync-alt"></i> 开始转动
+                        </button>
+                        <div id="wheelResult" class="result-area result-giant"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 密码生成器模块 -->
+            <div class="tab-panel" id="passwordGenPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">🔐</div>
+                    <h2 class="panel-title">密码生成器</h2>
+                    <p class="panel-desc">生成安全可靠的随机密码</p>
+                </div>
+                <div class="panel-body">
+                    <div class="password-area">
+                        <div class="password-presets">
+                            <button class="password-preset-btn" data-preset="simple">简单</button>
+                            <button class="password-preset-btn active" data-preset="normal">普通</button>
+                            <button class="password-preset-btn" data-preset="strong">强密码</button>
+                            <button class="password-preset-btn" data-preset="pin">PIN码</button>
+                        </div>
+                        <div class="password-options">
+                            <div class="password-length">
+                                <label>密码长度：<span id="passwordLengthDisplay">12</span></label>
+                                <input type="range" id="passwordLength" min="4" max="32" value="12">
+                            </div>
+                            <div class="password-checkboxes">
+                                <label><input type="checkbox" id="pwdLowercase" checked> 小写字母</label>
+                                <label><input type="checkbox" id="pwdUppercase" checked> 大写字母</label>
+                                <label><input type="checkbox" id="pwdNumbers" checked> 数字</label>
+                                <label><input type="checkbox" id="pwdSymbols" checked> 特殊符号</label>
+                            </div>
+                        </div>
+                        <button id="generatePasswordBtn" class="btn-primary btn-giant">
+                            <i class="fas fa-key"></i> 生成密码
+                        </button>
+                        <div id="passwordResult" class="result-area result-giant"></div>
+                        <div id="passwordStrength" class="password-strength"></div>
+                        <button id="copyPasswordBtn" class="btn-secondary" style="margin-top: 10px;">
+                            <i class="fas fa-copy"></i> 复制密码
+                        </button>
+                        <div id="passwordHistory" class="password-history"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 心情日记模块 -->
+            <div class="tab-panel" id="moodDiaryPanel">
+                <div class="panel-header">
+                    <div class="panel-icon">📔</div>
+                    <h2 class="panel-title">心情日记</h2>
+                    <p class="panel-desc">记录每一天的心情，留住美好时光</p>
+                </div>
+                <div class="panel-body">
+                    <div class="mood-area">
+                        <div id="todayQuote" class="today-quote"></div>
+                        <div class="mood-selector">
+                            <h3>今天心情如何？</h3>
+                            <div id="moodGrid" class="mood-grid"></div>
+                        </div>
+                        <div class="mood-note">
+                            <textarea id="moodNote" placeholder="写下今天的心情...（可选）"></textarea>
+                        </div>
+                        <button id="saveMoodBtn" class="btn-primary btn-giant">
+                            <i class="fas fa-save"></i> 记录心情
+                        </button>
+                        <div id="moodStats" class="mood-stats"></div>
+                        <div class="mood-history">
+                            <h3>最近记录</h3>
+                            <div id="moodEntries" class="mood-entries"></div>
                         </div>
                     </div>
                 </div>
@@ -551,6 +708,9 @@
     <script src="modules/fortune.js"></script>
     <script src="modules/blessing.js"></script>
     <script src="modules/aiChat.js"></script>
+    <script src="modules/luckyWheel.js"></script>
+    <script src="modules/passwordGen.js"></script>
+    <script src="modules/moodDiary.js"></script>
     <script src="modules/whackAMole.js"></script>
     <script src="modules/easterEgg.js"></script>
 </body>
