@@ -438,7 +438,12 @@ function handleAdminMessageAction(req, res) {
                     log(`留言已删除: ID=${messageId}`);
                     break;
                 case 'ban':
-                    // 删除留言并拉黑IP
+                    // 删除留言并拉黑IP（但不能拉黑管理员IP）
+                    if (CONFIG.adminIPs.includes(message.ip) || message.ip === '::ffff:127.0.0.1') {
+                        res.writeHead(403, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ success: false, error: '不能拉黑管理员IP' }));
+                        return;
+                    }
                     guestbookData.messages.splice(messageIndex, 1);
                     if (!isBlacklisted(message.ip)) {
                         blacklist.push({
@@ -1202,16 +1207,18 @@ function setSecurityHeaders(res) {
 
 // 获取客户端IP
 function getClientIP(req) {
-    // 优先使用直接连接的IP（防止X-Forwarded-For伪造）
-    // 只有在有可信代理时才使用X-Forwarded-For
+    // 优先使用直接连接的IP
     const directIP = req.connection.remoteAddress || req.socket.remoteAddress;
     
-    // 如果直接IP是内网或本地，尝试从代理头获取（VPS通常直接暴露）
-    if (directIP && (directIP.startsWith('127.') || directIP.startsWith('10.') || directIP.startsWith('192.168.') || directIP === '::1' || directIP === '::ffff:127.0.0.1')) {
-        const forwarded = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
-        if (forwarded) return forwarded;
-    }
+    // 尝试从各种代理头获取真实IP（按优先级）
+    const forwarded = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    const realIP = req.headers['x-real-ip'];
     
+    // 如果有代理头，优先使用（VPS通常有Nginx反向代理）
+    if (forwarded) return forwarded;
+    if (realIP) return realIP;
+    
+    // 否则使用直接IP
     return directIP || 'unknown';
 }
 
