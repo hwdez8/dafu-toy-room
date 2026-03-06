@@ -153,15 +153,17 @@
     
     // 显示结果
     function showResult(rotation) {
-        // Canvas 0度在右侧，但指针在顶部（-90度）
+        // Canvas 0度在右侧（3点钟方向）
+        // 指针在顶部（12点钟方向，即-90度或270度）
         // 转盘顺时针旋转，需要计算指针指向的扇形
+        
         const normalizedRotation = (rotation % 360 + 360) % 360;
         const anglePerOption = 360 / state.options.length;
         
-        // 指针在顶部（相对于Canvas是-90度或270度）
-        // 扇形0从0度开始，所以需要用(360 - 旋转角度)来反向计算
-        // 再加上90度偏移（因为指针在顶部）
-        const pointerAngle = (360 - normalizedRotation + 90) % 360;
+        // 指针在顶部（12点钟方向，对应Canvas的270度）
+        // 当转盘顺时针旋转X度时，原来在(270 - X)度位置的扇形会转到顶部
+        // 所以指针指向的扇形索引 = floor((270 - 旋转角度) / 每个扇形角度)
+        const pointerAngle = (270 - normalizedRotation + 360) % 360;
         const selectedIndex = Math.floor(pointerAngle / anglePerOption) % state.options.length;
         const selected = state.options[selectedIndex];
         
