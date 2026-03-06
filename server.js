@@ -451,20 +451,6 @@ function handleAdminMessageAction(req, res) {
         }
     });
 }
-            }
-            
-            blacklist.splice(index, 1);
-            saveGuestbookData();
-            log(`IP已解除拉黑: ${ip}`);
-            
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: true }));
-        } catch (e) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, error: '无效的请求' }));
-        }
-    });
-}
 
 // 获取统计数据的API
 function handleStatsAPI(req, res) {
