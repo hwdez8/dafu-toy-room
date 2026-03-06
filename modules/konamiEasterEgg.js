@@ -30,6 +30,9 @@
         });
     }
     
+    // 存储覆盖层引用，以便游戏开始时隐藏
+    let bowOverlay = null;
+    
     // 检测连续点击大门标题的"🎀"
     function initBowClickListener() {
         let bowClickCount = 0;
@@ -75,8 +78,9 @@
             };
             
             // 创建一个透明的覆盖层来捕获点击事件
-            const overlay = document.createElement('div');
-            overlay.style.cssText = `
+            bowOverlay = document.createElement('div');
+            bowOverlay.id = 'bowClickOverlay';
+            bowOverlay.style.cssText = `
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -92,11 +96,11 @@
                 gateHeader.style.position = 'relative';
             }
             
-            gateHeader.appendChild(overlay);
+            gateHeader.appendChild(bowOverlay);
             
             // 绑定点击事件到覆盖层
-            overlay.addEventListener('click', handleTap);
-            overlay.addEventListener('touchstart', (e) => {
+            bowOverlay.addEventListener('click', handleTap);
+            bowOverlay.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 handleTap(e);
             }, { passive: false });
@@ -116,6 +120,11 @@
         if (isGameActive) return;
         isGameActive = true;
         score = 0;
+        
+        // 隐藏标题点击覆盖层，避免阻挡游戏点击
+        if (bowOverlay) {
+            bowOverlay.style.display = 'none';
+        }
         
         createGameUI();
         startGame();
@@ -227,11 +236,16 @@
             }
             
             @keyframes sylveon-fall-anim {
-                from {
+                0% {
                     transform: translateY(-100px) rotate(0deg);
+                    opacity: 0;
                 }
-                to {
+                10% {
+                    opacity: 1;
+                }
+                100% {
                     transform: translateY(calc(100vh + 100px)) rotate(360deg);
+                    opacity: 1;
                 }
             }
             
