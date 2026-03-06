@@ -107,8 +107,8 @@
         const styles = `
             .theme-switcher {
                 position: fixed;
-                top: 20px;
-                right: 20px;
+                bottom: 100px;
+                left: 30px;
                 z-index: 1000;
             }
             
@@ -139,15 +139,15 @@
             
             .theme-panel {
                 position: absolute;
-                top: 60px;
-                right: 0;
+                bottom: 60px;
+                left: 0;
                 background: var(--card-bg);
                 border-radius: 15px;
                 padding: 10px;
                 box-shadow: 0 4px 20px rgba(0,0,0,0.15);
                 opacity: 0;
                 visibility: hidden;
-                transform: translateY(-10px);
+                transform: translateY(10px);
                 transition: all 0.3s ease;
                 min-width: 150px;
             }
@@ -195,8 +195,8 @@
             
             @media (max-width: 768px) {
                 .theme-switcher {
-                    top: 10px;
-                    right: 10px;
+                    bottom: 90px;
+                    left: 20px;
                 }
                 
                 .theme-btn {
@@ -210,8 +210,9 @@
                 }
                 
                 .theme-panel {
-                    top: 50px;
-                    right: -10px;
+                    bottom: 50px;
+                    left: 0;
+                    top: auto;
                 }
             }
         `;
