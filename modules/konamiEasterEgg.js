@@ -160,11 +160,6 @@
                 overflow: hidden;
                 cursor: crosshair;
                 touch-action: none;
-                pointer-events: none;
-            }
-            
-            .konami-game > * {
-                pointer-events: auto;
             }
             
             .konami-score {
@@ -221,17 +216,17 @@
             }
             
             .sylveon-fall {
-                position: fixed;
+                position: absolute;
                 font-size: 3rem;
                 cursor: pointer;
                 user-select: none;
                 pointer-events: auto;
                 filter: drop-shadow(0 5px 10px rgba(255, 107, 157, 0.4));
                 transition: transform 0.1s;
-                z-index: 100010;
+                z-index: 1;
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: transparent;
-                will-change: transform, top;
+                will-change: transform;
             }
             
             .sylveon-fall:hover {
@@ -363,35 +358,40 @@
     function spawnSylveon() {
         if (!isGameActive) return;
         
+        const gameEl = document.getElementById('konamiGame');
+        if (!gameEl) return;
+        
         const sylveon = document.createElement('div');
         sylveon.className = 'sylveon-fall';
         sylveon.textContent = '🎀';
         
-        // 使用固定定位，从屏幕顶部外开始
-        const startX = Math.random() * 80 + 10; // 10% - 90% 屏幕宽度
+        // 随机水平位置
+        const startX = Math.random() * 85 + 5; // 5% - 90% 容器宽度
         const duration = Math.random() * 2 + 3; // 3-5秒下落时间
         
         sylveon.style.left = startX + '%';
-        sylveon.style.top = '-80px';
+        sylveon.style.top = '-60px';
         sylveon.style.animation = `sylveon-fall-anim ${duration}s linear forwards`;
         
-        // 同时支持 click 和 touchstart
+        // 点击处理 - 使用 pointerdown 统一处理鼠标和触摸
         const handleSylveonTap = (e) => {
-            e.preventDefault();
             e.stopPropagation();
             
-            // 获取点击位置
-            const touch = e.touches ? e.touches[0] : null;
-            const x = touch ? touch.clientX : e.clientX;
-            const y = touch ? touch.clientY : e.clientY;
+            // 防止重复触发
+            if (sylveon.classList.contains('pop')) return;
             
-            popSylveon(sylveon, x || 0, y || 0);
+            // 获取点击位置
+            const rect = sylveon.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            
+            popSylveon(sylveon, x, y);
         };
         
-        sylveon.addEventListener('click', handleSylveonTap);
-        sylveon.addEventListener('touchstart', handleSylveonTap, { passive: false });
+        // 使用 pointerdown 统一处理所有输入类型
+        sylveon.addEventListener('pointerdown', handleSylveonTap);
         
-        document.body.appendChild(sylveon);
+        gameEl.appendChild(sylveon);
         
         // 动画结束后移除
         const removeTimer = setTimeout(() => {
@@ -478,17 +478,17 @@
         clearInterval(spawnInterval);
         clearTimeout(endGameTimeout);
         
-        // 清除所有飘落的 Sylveon（从 body 中移除）
-        const fallingSylveons = document.querySelectorAll('.sylveon-fall');
+        const gameEl = document.getElementById('konamiGame');
+        if (!gameEl) return;
+        
+        // 清除所有飘落的 Sylveon
+        const fallingSylveons = gameEl.querySelectorAll('.sylveon-fall');
         fallingSylveons.forEach(el => {
             if (el.dataset.removeTimer) {
                 clearTimeout(parseInt(el.dataset.removeTimer));
             }
             el.remove();
         });
-        
-        const gameEl = document.getElementById('konamiGame');
-        if (!gameEl) return;
         
         // 显示结束界面
         const endHTML = `
