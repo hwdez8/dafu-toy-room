@@ -265,9 +265,9 @@ function serveFile(filePath, res) {
             return;
         }
         
-        // 添加缓存控制
+        // 添加缓存控制，对HTML文件添加charset
         const headers = {
-            'Content-Type': contentType,
+            'Content-Type': contentType + (ext === '.html' ? '; charset=utf-8' : ''),
             'Cache-Control': 'public, max-age=3600'
         };
         
