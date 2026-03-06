@@ -216,15 +216,17 @@
             }
             
             .sylveon-fall {
-                position: absolute;
+                position: fixed;
                 font-size: 3rem;
                 cursor: pointer;
                 user-select: none;
-                animation: sylveon-fall-anim linear;
+                pointer-events: auto;
                 filter: drop-shadow(0 5px 10px rgba(255, 107, 157, 0.4));
                 transition: transform 0.1s;
                 z-index: 100010;
                 touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+                will-change: transform, top;
             }
             
             .sylveon-fall:hover {
@@ -232,20 +234,15 @@
             }
             
             .sylveon-fall.pop {
-                animation: sylveon-pop 0.3s ease-out forwards;
+                animation: sylveon-pop 0.3s ease-out forwards !important;
             }
             
             @keyframes sylveon-fall-anim {
-                0% {
-                    transform: translateY(-100px) rotate(0deg);
-                    opacity: 0;
+                from {
+                    transform: translateY(0) rotate(0deg);
                 }
-                10% {
-                    opacity: 1;
-                }
-                100% {
-                    transform: translateY(calc(100vh + 100px)) rotate(360deg);
-                    opacity: 1;
+                to {
+                    transform: translateY(calc(100vh + 150px)) rotate(360deg);
                 }
             }
             
@@ -360,25 +357,42 @@
         const sylveon = document.createElement('div');
         sylveon.className = 'sylveon-fall';
         sylveon.textContent = '🎀';
-        sylveon.style.left = Math.random() * 90 + 5 + '%';
-        sylveon.style.animationDuration = (Math.random() * 3 + 2) + 's';
         
-        sylveon.addEventListener('click', (e) => {
+        // 使用固定定位，从屏幕顶部外开始
+        const startX = Math.random() * 80 + 10; // 10% - 90% 屏幕宽度
+        const duration = Math.random() * 2 + 3; // 3-5秒下落时间
+        
+        sylveon.style.left = startX + '%';
+        sylveon.style.top = '-80px';
+        sylveon.style.animation = `sylveon-fall-anim ${duration}s linear forwards`;
+        
+        // 同时支持 click 和 touchstart
+        const handleSylveonTap = (e) => {
+            e.preventDefault();
             e.stopPropagation();
-            popSylveon(sylveon, e.clientX, e.clientY);
-        });
-        
-        const gameEl = document.getElementById('konamiGame');
-        if (gameEl) {
-            gameEl.appendChild(sylveon);
             
-            // 动画结束后移除
-            sylveon.addEventListener('animationend', () => {
-                if (sylveon.parentNode) {
-                    sylveon.remove();
-                }
-            });
-        }
+            // 获取点击位置
+            const touch = e.touches ? e.touches[0] : null;
+            const x = touch ? touch.clientX : e.clientX;
+            const y = touch ? touch.clientY : e.clientY;
+            
+            popSylveon(sylveon, x || 0, y || 0);
+        };
+        
+        sylveon.addEventListener('click', handleSylveonTap);
+        sylveon.addEventListener('touchstart', handleSylveonTap, { passive: false });
+        
+        document.body.appendChild(sylveon);
+        
+        // 动画结束后移除
+        const removeTimer = setTimeout(() => {
+            if (sylveon.parentNode) {
+                sylveon.remove();
+            }
+        }, duration * 1000);
+        
+        // 如果提前被点击消除，清除定时器
+        sylveon.dataset.removeTimer = removeTimer;
     }
     
     // 点击消除 Sylveon
@@ -386,6 +400,12 @@
         if (element.classList.contains('pop')) return;
         
         element.classList.add('pop');
+        
+        // 清除自动移除定时器
+        if (element.dataset.removeTimer) {
+            clearTimeout(parseInt(element.dataset.removeTimer));
+        }
+        
         score++;
         const scoreEl = document.getElementById('konamiScore');
         if (scoreEl) {
@@ -398,7 +418,11 @@
         // 播放音效（如果有的话）
         playPopSound();
         
-        setTimeout(() => element.remove(), 300);
+        setTimeout(() => {
+            if (element.parentNode) {
+                element.remove();
+            }
+        }, 300);
     }
     
     // 显示得分弹出
@@ -445,12 +469,17 @@
         clearInterval(spawnInterval);
         clearTimeout(endGameTimeout);
         
+        // 清除所有飘落的 Sylveon（从 body 中移除）
+        const fallingSylveons = document.querySelectorAll('.sylveon-fall');
+        fallingSylveons.forEach(el => {
+            if (el.dataset.removeTimer) {
+                clearTimeout(parseInt(el.dataset.removeTimer));
+            }
+            el.remove();
+        });
+        
         const gameEl = document.getElementById('konamiGame');
         if (!gameEl) return;
-        
-        // 清除所有飘落的 Sylveon
-        const fallingSylveons = gameEl.querySelectorAll('.sylveon-fall');
-        fallingSylveons.forEach(el => el.remove());
         
         // 显示结束界面
         const endHTML = `
