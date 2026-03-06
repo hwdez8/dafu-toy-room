@@ -22,7 +22,7 @@ const CONFIG = {
     maxRequestSize: 1024 * 1024, // 1MB 最大请求体
     allowedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://fufud.cc', 'https://www.fufud.cc', 'http://194.41.36.137:3000'],
     rateLimitWindow: 60000, // 1分钟
-    rateLimitMax: 100, // 每分钟最大请求数
+    rateLimitMax: 60, // 每分钟最大请求数（1核1G服务器建议）
     // 管理员配置 - 支持多种IP格式
     adminIPs: [
         '175.4.244.62',           // 原始格式
@@ -942,6 +942,148 @@ function verifyAdminPassword(password) {
 // 初始化加载数据
 loadGuestbookData();
 
+// 速率限制提示页面
+function getRateLimitPage() {
+    return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大福玩具房 - 休息一下</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #fff5f7 0%, #ffe4ec 50%, #fff0f3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            background: white;
+            padding: 50px 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 40px rgba(255, 107, 157, 0.2);
+            max-width: 450px;
+            width: 100%;
+        }
+        
+        .sylveon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        h1 {
+            color: #ff6b9d;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        
+        .countdown {
+            background: linear-gradient(135deg, #ffc2d1, #ff8fab);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff6b9d;
+            margin: 20px 0;
+        }
+        
+        .tips {
+            background: #fff5f7;
+            padding: 15px 20px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            color: #888;
+            margin-top: 20px;
+        }
+        
+        .tips span {
+            display: block;
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 25px;
+            }
+            
+            .sylveon {
+                font-size: 4rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sylveon">🎀</div>
+        <h1>哎呀，人太多啦！</h1>
+        <p>大福的玩具房现在有点挤<br>仙子伊布正在努力接待中...</p>
+        <div class="countdown">⏰ 请稍等 <span id="timer">60</span> 秒</div>
+        <p style="font-size: 0.9rem; color: #999;">自动刷新中...</p>
+        <div class="tips">
+            <span>💡 小贴士：</span>
+            <span>• 每分钟最多 60 次访问</span>
+            <span>• 稍后会自动恢复</span>
+            <span>• 感谢你的耐心等待~</span>
+        </div>
+    </div>
+    
+    <script>
+        let seconds = 60;
+        const timerEl = document.getElementById('timer');
+        
+        setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+                seconds = 60;
+                location.reload();
+            }
+            timerEl.textContent = seconds;
+        }, 1000);
+        
+        // 5秒后自动尝试刷新
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+    </script>
+</body>
+</html>`;
+}
+
 // 检查速率限制
 function checkRateLimit(clientIP) {
     const now = Date.now();
@@ -999,8 +1141,8 @@ const server = http.createServer((req, res) => {
     
     // 速率限制检查
     if (!checkRateLimit(clientIP)) {
-        res.writeHead(429, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: '请求过于频繁，请稍后再试' }));
+        res.writeHead(429, { 'Content-Type': 'text/html; charset=utf-8' });
+        res.end(getRateLimitPage());
         log(`速率限制触发: ${clientIP}`, 'error');
         return;
     }
