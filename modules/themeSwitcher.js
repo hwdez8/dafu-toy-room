@@ -7,18 +7,13 @@
 (function() {
     'use strict';
     
-    // SVG图标
-    const ICONS = {
-        palette: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 2a8 8 0 0 0-8 8c0 4.418 3.582 8 8 8s8-3.582 8-8a8 8 0 0 0-8-8z"/><path d="M12 6v12M6 12h12"/><circle cx="12" cy="12" r="3"/></svg>`,
-        heart: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
-        moon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 2c-1.05 0-2.05.16-3 .46 1.69 1.2 2.86 3.06 2.86 5.21 0 3.64-2.95 6.59-6.59 6.59-.71 0-1.39-.12-2.03-.33C1.12 17.15 4.68 20 9 20c5.52 0 10-4.48 10-10S14.52 2 9 2z"/></svg>`
-    };
-
+    // 简化的调色板 SVG
+    const PALETTE_SVG = '<svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2"/></svg>';
+    
     // 主题配置
     const THEMES = {
         pink: {
             name: '粉色系',
-            icon: ICONS.palette,
             colors: {
                 '--primary-color': '#ff6b9d',
                 '--primary-light': '#ffc2d1',
@@ -32,7 +27,6 @@
         },
         blue: {
             name: '蓝色系',
-            icon: ICONS.heart,
             colors: {
                 '--primary-color': '#5c9dff',
                 '--primary-light': '#b8d4ff',
@@ -46,7 +40,6 @@
         },
         dark: {
             name: '暗色系',
-            icon: ICONS.moon,
             colors: {
                 '--primary-color': '#ff6b9d',
                 '--primary-light': '#ff8fab',
@@ -75,9 +68,8 @@
         
         currentTheme = themeName;
         localStorage.setItem('dafu-theme', themeName);
-        updateSwitcherButton();
         
-        console.log(`🎨 主题已切换: ${theme.name}`);
+        console.log('主题已切换: ' + theme.name);
     }
     
     // 创建切换按钮
@@ -86,15 +78,21 @@
         switcher.className = 'theme-switcher';
         switcher.innerHTML = `
             <button class="theme-btn" id="themeBtn" title="切换主题">
-                ${THEMES[currentTheme].icon}
+                ${PALETTE_SVG}
             </button>
             <div class="theme-panel" id="themePanel">
-                ${Object.entries(THEMES).map(([key, theme]) => `
-                    <div class="theme-option ${key === currentTheme ? 'active' : ''}" data-theme="${key}">
-                        <span class="theme-icon">${theme.icon}</span>
-                        <span class="theme-name">${theme.name}</span>
-                    </div>
-                `).join('')}
+                <div class="theme-option ${currentTheme === 'pink' ? 'active' : ''}" data-theme="pink">
+                    <span class="theme-dot" style="background:#ff6b9d"></span>
+                    <span class="theme-name">粉色系</span>
+                </div>
+                <div class="theme-option ${currentTheme === 'blue' ? 'active' : ''}" data-theme="blue">
+                    <span class="theme-dot" style="background:#5c9dff"></span>
+                    <span class="theme-name">蓝色系</span>
+                </div>
+                <div class="theme-option ${currentTheme === 'dark' ? 'active' : ''}" data-theme="dark">
+                    <span class="theme-dot" style="background:#1a1a2e"></span>
+                    <span class="theme-name">暗色系</span>
+                </div>
             </div>
         `;
         
@@ -182,18 +180,12 @@
                 background: var(--primary-light);
             }
             
-            .theme-icon {
-                width: 20px;
-                height: 20px;
+            .theme-dot {
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
                 margin-right: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .theme-icon svg {
-                width: 100%;
-                height: 100%;
+                border: 2px solid rgba(0,0,0,0.1);
             }
             
             .theme-name {
@@ -201,7 +193,6 @@
                 color: var(--text-color);
             }
             
-            /* 移动端适配 */
             @media (max-width: 768px) {
                 .theme-switcher {
                     top: 10px;
@@ -211,7 +202,11 @@
                 .theme-btn {
                     width: 40px;
                     height: 40px;
-                    font-size: 1.2rem;
+                }
+                
+                .theme-btn svg {
+                    width: 20px;
+                    height: 20px;
                 }
                 
                 .theme-panel {
@@ -231,20 +226,17 @@
         const btn = document.getElementById('themeBtn');
         const panel = document.getElementById('themePanel');
         
-        // 点击按钮展开/收起面板
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
             panel.classList.toggle('show');
         });
         
-        // 点击选项切换主题
         panel.querySelectorAll('.theme-option').forEach(option => {
             option.addEventListener('click', () => {
                 const theme = option.dataset.theme;
                 applyTheme(theme);
                 panel.classList.remove('show');
                 
-                // 更新激活状态
                 panel.querySelectorAll('.theme-option').forEach(opt => {
                     opt.classList.remove('active');
                 });
@@ -252,18 +244,9 @@
             });
         });
         
-        // 点击其他地方关闭面板
         document.addEventListener('click', () => {
             panel.classList.remove('show');
         });
-    }
-    
-    // 更新按钮图标
-    function updateSwitcherButton() {
-        const btn = document.getElementById('themeBtn');
-        if (btn) {
-            btn.textContent = THEMES[currentTheme].icon;
-        }
     }
     
     // 初始化
@@ -274,7 +257,7 @@
             createThemeSwitcher();
         }
         
-        console.log('🎨 主题切换模块已加载！');
+        console.log('主题切换模块已加载！');
     }
     
     // 注册模块

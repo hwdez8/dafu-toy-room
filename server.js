@@ -23,8 +23,13 @@ const CONFIG = {
     allowedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://fufud.cc', 'https://www.fufud.cc', 'http://194.41.36.137:3000'],
     rateLimitWindow: 60000, // 1分钟
     rateLimitMax: 100, // 每分钟最大请求数
-    // 管理员配置
-    adminIPs: ['175.4.244.62'], // 管理员IP白名单
+    // 管理员配置 - 支持多种IP格式
+    adminIPs: [
+        '175.4.244.62',           // 原始格式
+        '::ffff:175.4.244.62',    // IPv6映射格式
+        '::1',                    // 本地IPv6
+        '127.0.0.1'               // 本地IPv4
+    ],
     adminPassword: 'O&0T89oAaDi7' // 备用密码
 };
 
@@ -1052,6 +1057,22 @@ const server = http.createServer((req, res) => {
             status: 'ok', 
             timestamp: new Date().toISOString(),
             service: '大福玩具房'
+        }));
+        return;
+    }
+    
+    // 查看我的IP（调试用）
+    if (pathname === '/myip') {
+        const forwarded = req.headers['x-forwarded-for'];
+        const remoteAddr = req.connection.remoteAddress;
+        const socketAddr = req.socket.remoteAddress;
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            'x-forwarded-for': forwarded,
+            'connection.remoteAddress': remoteAddr,
+            'socket.remoteAddress': socketAddr,
+            'getClientIP()': getClientIP(req),
+            'isAdmin': isAdmin(req)
         }));
         return;
     }
