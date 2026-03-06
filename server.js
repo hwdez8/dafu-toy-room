@@ -22,7 +22,10 @@ const CONFIG = {
     maxRequestSize: 1024 * 1024, // 1MB 最大请求体
     allowedOrigins: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://fufud.cc', 'https://www.fufud.cc', 'http://194.41.36.137:3000'],
     rateLimitWindow: 60000, // 1分钟
-    rateLimitMax: 100 // 每分钟最大请求数
+    rateLimitMax: 100, // 每分钟最大请求数
+    // 管理员配置
+    adminIPs: ['175.4.244.62'], // 管理员IP白名单
+    adminPassword: 'O&0T89oAaDi7' // 备用密码
 };
 
 // ========================================
@@ -170,6 +173,16 @@ function recordVisit(clientIP) {
         serverStats.total.uniqueVisitors++;
     }
     
+    // 检查总计数是否达到上限（999），达到则归零
+    if (serverStats.total.totalVisits >= 999) {
+        serverStats.total.totalVisits = 0;
+        log('总访问量达到999，已归零重置', 'warn');
+    }
+    if (serverStats.total.uniqueVisitors >= 999) {
+        serverStats.total.uniqueVisitors = 0;
+        log('总访客数达到999，已归零重置', 'warn');
+    }
+    
     serverStats.total.lastUpdated = new Date().toISOString();
     saveStats();
 }
@@ -186,8 +199,269 @@ function recordModuleUsage(moduleName) {
     
     serverStats.today.moduleUsage[moduleName]++;
     serverStats.total.moduleUsage[moduleName]++;
+    
+    // 检查模块总计数是否达到上限（999），达到则归零
+    if (serverStats.total.moduleUsage[moduleName] >= 999) {
+        serverStats.total.moduleUsage[moduleName] = 0;
+        log(`模块 ${moduleName} 总使用次数达到999，已归零重置`, 'warn');
+    }
+    
     serverStats.total.lastUpdated = new Date().toISOString();
     saveStats();
+}
+
+// ==================== 留言板API处理函数 ====================
+
+// 获取已审核留言
+function handleGuestbookGet(req, res) {
+    const approvedMessages = guestbookData.messages
+        .filter(msg => msg.status === 'approved')
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 50); // 最多显示50条
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ 
+        success: true, 
+        messages: approvedMessages.map(msg => ({
+            id: msg.id,
+            content: msg.content,
+            date: msg.date,
+            time: msg.time
+        }))
+    }));
+}
+
+// 检查是否可以留言（每天一次）
+function canGuestbookToday(ip) {
+    // 管理员IP不受限制
+    if (CONFIG.adminIPs.includes(ip)) {
+        return { allowed: true };
+    }
+    
+    const today = new Date().toDateString();
+    const lastPostDate = guestbookLimitMap.get(ip);
+    
+    if (lastPostDate === today) {
+        return { 
+            allowed: false, 
+            error: '您今天已经留言过了，明天再来吧~' 
+        };
+    }
+    
+    return { allowed: true };
+}
+
+// 提交留言
+function handleGuestbookPost(req, res) {
+    const clientIP = getClientIP(req);
+    
+    // 检查IP是否在黑名单
+    if (isBlacklisted(clientIP)) {
+        res.writeHead(403, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: '您已被拉黑，无法留言' }));
+        return;
+    }
+    
+    // 检查每日留言限制
+    const limitCheck = canGuestbookToday(clientIP);
+    if (!limitCheck.allowed) {
+        res.writeHead(429, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: limitCheck.error }));
+        return;
+    }
+    
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+        try {
+            const data = JSON.parse(body);
+            const content = data.content?.trim();
+            
+            // 验证内容
+            if (!content || content.length < 2) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: '留言太短了' }));
+                return;
+            }
+            
+            if (content.length > 200) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: '留言太长了' }));
+                return;
+            }
+            
+            // 创建留言
+            const now = new Date();
+            const message = {
+                id: guestbookData.nextId++,
+                content: content,
+                ip: clientIP,
+                status: 'pending', // pending, approved, rejected
+                timestamp: now.getTime(),
+                date: now.toLocaleDateString('zh-CN'),
+                time: now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            guestbookData.messages.push(message);
+            saveGuestbookData();
+            
+            // 记录该IP今天已留言
+            guestbookLimitMap.set(clientIP, now.toDateString());
+            
+            log(`新留言提交: ID=${message.id}, IP=${clientIP}`);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, message: '提交成功，等待审核' }));
+        } catch (e) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: '无效的请求' }));
+        }
+    });
+}
+
+// ==================== 管理员API处理函数 ====================
+
+// 检查是否是管理员
+function handleAdminCheck(req, res) {
+    const isAdminUser = isAdmin(req);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ isAdmin: isAdminUser }));
+}
+
+// 管理员登录
+function handleAdminLogin(req, res) {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+        try {
+            const data = JSON.parse(body);
+            const password = data.password;
+            
+            if (verifyAdminPassword(password)) {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true }));
+            } else {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: '密码错误' }));
+            }
+        } catch (e) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: '无效的请求' }));
+        }
+    });
+}
+
+// 获取待审核留言
+function handleAdminPending(req, res) {
+    const pendingMessages = guestbookData.messages
+        .filter(msg => msg.status === 'pending')
+        .sort((a, b) => b.timestamp - a.timestamp);
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, messages: pendingMessages }));
+}
+
+// 获取已发布留言
+function handleAdminApproved(req, res) {
+    const approvedMessages = guestbookData.messages
+        .filter(msg => msg.status === 'approved')
+        .sort((a, b) => b.timestamp - a.timestamp);
+    
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, messages: approvedMessages }));
+}
+
+// 获取黑名单
+function handleAdminBlacklist(req, res) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, ips: blacklist }));
+}
+
+// 处理留言（通过/删除/拉黑）
+function handleAdminMessageAction(req, res) {
+    const parsedUrl = url.parse(req.url, true);
+    const messageId = parseInt(parsedUrl.pathname.split('/').pop());
+    
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+        try {
+            const data = JSON.parse(body);
+            const action = data.action; // 'approve', 'delete', 'ban'
+            
+            const messageIndex = guestbookData.messages.findIndex(m => m.id === messageId);
+            if (messageIndex === -1) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: '留言不存在' }));
+                return;
+            }
+            
+            const message = guestbookData.messages[messageIndex];
+            
+            switch (action) {
+                case 'approve':
+                    message.status = 'approved';
+                    log(`留言审核通过: ID=${messageId}`);
+                    break;
+                case 'delete':
+                    guestbookData.messages.splice(messageIndex, 1);
+                    log(`留言已删除: ID=${messageId}`);
+                    break;
+                case 'ban':
+                    // 删除留言并拉黑IP
+                    guestbookData.messages.splice(messageIndex, 1);
+                    if (!isBlacklisted(message.ip)) {
+                        blacklist.push({
+                            ip: message.ip,
+                            banDate: new Date().toLocaleDateString('zh-CN'),
+                            reason: '恶意留言'
+                        });
+                        log(`IP已拉黑: ${message.ip}`);
+                    }
+                    break;
+                default:
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: '无效的操作' }));
+                    return;
+            }
+            
+            saveGuestbookData();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        } catch (e) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: '无效的请求' }));
+        }
+    });
+}
+
+// 解除拉黑
+function handleAdminUnban(req, res) {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => {
+        try {
+            const data = JSON.parse(body);
+            const ip = data.ip;
+            
+            const index = blacklist.findIndex(item => item.ip === ip);
+            if (index === -1) {
+                res.writeHead(404, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: 'IP不在黑名单中' }));
+                return;
+            }
+            
+            blacklist.splice(index, 1);
+            saveGuestbookData();
+            log(`IP已解除拉黑: ${ip}`);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+        } catch (e) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: '无效的请求' }));
+        }
+    });
 }
 
 // 获取统计数据的API
@@ -595,6 +869,68 @@ function generateBlessing(req, res) {
 // 简单的速率限制存储
 const rateLimitMap = new Map();
 
+// 留言限制存储 - 记录每个IP最后一次留言日期
+const guestbookLimitMap = new Map();
+
+// 留言板数据存储
+const GUESTBOOK_FILE = path.join(__dirname, 'data', 'guestbook.json');
+const BLACKLIST_FILE = path.join(__dirname, 'data', 'blacklist.json');
+
+// 确保数据目录存在
+if (!fs.existsSync(path.join(__dirname, 'data'))) {
+    fs.mkdirSync(path.join(__dirname, 'data'));
+}
+
+// 加载留言板数据
+let guestbookData = {
+    messages: [],
+    nextId: 1
+};
+let blacklist = [];
+
+function loadGuestbookData() {
+    try {
+        if (fs.existsSync(GUESTBOOK_FILE)) {
+            const data = fs.readFileSync(GUESTBOOK_FILE, 'utf8');
+            guestbookData = JSON.parse(data);
+        }
+        if (fs.existsSync(BLACKLIST_FILE)) {
+            const data = fs.readFileSync(BLACKLIST_FILE, 'utf8');
+            blacklist = JSON.parse(data);
+        }
+    } catch (e) {
+        log('加载留言板数据失败', 'error');
+    }
+}
+
+function saveGuestbookData() {
+    try {
+        fs.writeFileSync(GUESTBOOK_FILE, JSON.stringify(guestbookData, null, 2));
+        fs.writeFileSync(BLACKLIST_FILE, JSON.stringify(blacklist, null, 2));
+    } catch (e) {
+        log('保存留言板数据失败', 'error');
+    }
+}
+
+// 检查IP是否在黑名单
+function isBlacklisted(ip) {
+    return blacklist.some(item => item.ip === ip);
+}
+
+// 检查是否是管理员
+function isAdmin(req) {
+    const clientIP = getClientIP(req);
+    return CONFIG.adminIPs.includes(clientIP);
+}
+
+// 验证管理员密码
+function verifyAdminPassword(password) {
+    return password === CONFIG.adminPassword;
+}
+
+// 初始化加载数据
+loadGuestbookData();
+
 // 检查速率限制
 function checkRateLimit(clientIP) {
     const now = Date.now();
@@ -711,6 +1047,69 @@ const server = http.createServer((req, res) => {
             timestamp: new Date().toISOString(),
             service: '大福玩具房'
         }));
+        return;
+    }
+    
+    // 留言板API - 获取已审核留言
+    if (pathname === '/api/guestbook' && req.method === 'GET') {
+        handleGuestbookGet(req, res);
+        return;
+    }
+    
+    // 留言板API - 检查今日是否可以留言
+    if (pathname === '/api/guestbook/check' && req.method === 'GET') {
+        const clientIP = getClientIP(req);
+        const checkResult = canGuestbookToday(clientIP);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ canPost: checkResult.allowed }));
+        return;
+    }
+    
+    // 留言板API - 提交留言
+    if (pathname === '/api/guestbook' && req.method === 'POST') {
+        handleGuestbookPost(req, res);
+        return;
+    }
+    
+    // 管理员API - 检查是否是管理员
+    if (pathname === '/api/admin/check' && req.method === 'GET') {
+        handleAdminCheck(req, res);
+        return;
+    }
+    
+    // 管理员API - 登录
+    if (pathname === '/api/admin/login' && req.method === 'POST') {
+        handleAdminLogin(req, res);
+        return;
+    }
+    
+    // 管理员API - 获取待审核留言
+    if (pathname === '/api/admin/pending' && req.method === 'GET') {
+        handleAdminPending(req, res);
+        return;
+    }
+    
+    // 管理员API - 获取已发布留言
+    if (pathname === '/api/admin/approved' && req.method === 'GET') {
+        handleAdminApproved(req, res);
+        return;
+    }
+    
+    // 管理员API - 获取黑名单
+    if (pathname === '/api/admin/blacklist' && req.method === 'GET') {
+        handleAdminBlacklist(req, res);
+        return;
+    }
+    
+    // 管理员API - 处理留言（通过/删除/拉黑）
+    if (pathname.startsWith('/api/admin/message/') && req.method === 'POST') {
+        handleAdminMessageAction(req, res);
+        return;
+    }
+    
+    // 管理员API - 解除拉黑
+    if (pathname === '/api/admin/unban' && req.method === 'POST') {
+        handleAdminUnban(req, res);
         return;
     }
     
