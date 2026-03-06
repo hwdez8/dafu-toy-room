@@ -22,30 +22,37 @@
     
     // 创建手机端彩蛋按钮
     function createMobileEasterEgg() {
-        const btn = document.createElement('div');
-        btn.className = 'easter-egg-mobile';
-        btn.innerHTML = '🎉';
-        btn.title = '点我5次有惊喜~';
-        
-        // 插入到大门的猫咪下方
-        const gateFooter = document.querySelector('.gate-footer');
-        if (gateFooter) {
-            gateFooter.insertBefore(btn, gateFooter.firstChild);
-            addMobileStyles();
-            bindMobileEvents(btn);
-        }
+        // 延迟执行，确保 DOM 已准备好
+        setTimeout(() => {
+            const btn = document.createElement('div');
+            btn.className = 'easter-egg-mobile';
+            btn.innerHTML = '🎉';
+            btn.title = '点我5次有惊喜~';
+            
+            // 插入到大门的猫咪下方
+            const gateFooter = document.querySelector('.gate-footer');
+            if (gateFooter) {
+                gateFooter.insertBefore(btn, gateFooter.firstChild);
+                addMobileStyles();
+                bindMobileEvents(btn);
+                console.log('🎉 手机彩蛋按钮已创建');
+            } else {
+                console.log('⚠️ 未找到 .gate-footer，彩蛋按钮未创建');
+            }
+        }, 1000); // 延迟1秒确保DOM加载完成
     }
     
     // 添加手机端样式
     function addMobileStyles() {
         const styles = `
             .easter-egg-mobile {
-                font-size: 2rem;
+                font-size: 2.5rem;
                 cursor: pointer;
                 display: inline-block;
                 margin: 10px;
                 animation: easter-egg-bounce 2s infinite;
                 transition: transform 0.3s;
+                filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
             }
             
             .easter-egg-mobile:hover {
@@ -53,8 +60,8 @@
             }
             
             @keyframes easter-egg-bounce {
-                0%, 100% { transform: translateY(0); }
-                50% { transform: translateY(-10px); }
+                0%, 100% { transform: translateY(0) rotate(-5deg); }
+                50% { transform: translateY(-10px) rotate(5deg); }
             }
             
             .easter-egg-mobile.clicked {
@@ -131,6 +138,9 @@
         // 启动烟花
         startFireworks();
         
+        // 启动飘落的庆祝图标
+        startFallingEmojis();
+        
         console.log('🎮 彩蛋已触发！来源:', source);
     }
     
@@ -142,7 +152,6 @@
         const interval = setInterval(() => {
             if (Date.now() > endTime) {
                 clearInterval(interval);
-                isTriggered = false;
                 return;
             }
             createFirework();
@@ -152,6 +161,58 @@
         for (let i = 0; i < 3; i++) {
             setTimeout(createFirework, i * 100);
         }
+    }
+    
+    // 飘落的庆祝图标
+    function startFallingEmojis() {
+        const emojis = ['🎊', '🎉'];
+        const duration = 8000; // 8秒
+        const endTime = Date.now() + duration;
+        
+        const interval = setInterval(() => {
+            if (Date.now() > endTime) {
+                clearInterval(interval);
+                isTriggered = false;
+                return;
+            }
+            createFallingEmoji(emojis[Math.floor(Math.random() * emojis.length)]);
+        }, 200);
+        
+        // 立即创建几个
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => createFallingEmoji(emojis[Math.floor(Math.random() * emojis.length)]), i * 100);
+        }
+    }
+    
+    // 创建飘落的图标
+    function createFallingEmoji(emoji) {
+        const el = document.createElement('div');
+        const startX = Math.random() * window.innerWidth;
+        const duration = 3000 + Math.random() * 2000;
+        const rotation = Math.random() * 360;
+        const scale = 0.8 + Math.random() * 0.7;
+        
+        el.textContent = emoji;
+        el.style.cssText = `
+            position: fixed;
+            left: ${startX}px;
+            top: -50px;
+            font-size: ${2 + Math.random()}rem;
+            pointer-events: none;
+            z-index: 99998;
+            opacity: 0.8;
+        `;
+        
+        document.body.appendChild(el);
+        
+        // 飘落动画
+        el.animate([
+            { transform: `translateY(0) rotate(0deg) scale(${scale})`, opacity: 0.8 },
+            { transform: `translateY(${window.innerHeight + 100}px) rotate(${rotation}deg) scale(${scale})`, opacity: 0 }
+        ], {
+            duration: duration,
+            easing: 'linear'
+        }).onfinish = () => el.remove();
     }
     
     // 创建单个烟花
@@ -255,15 +316,9 @@
     
     // 初始化
     function init() {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
-                createMobileEasterEgg();
-                bindKonamiCode();
-            });
-        } else {
-            createMobileEasterEgg();
-            bindKonamiCode();
-        }
+        // 延迟创建手机按钮，确保大门已加载
+        createMobileEasterEgg();
+        bindKonamiCode();
         
         console.log('🎮 Konami彩蛋模块已加载！');
         console.log('💡 电脑：输入 ↑↑↓↓←→←→BA');
