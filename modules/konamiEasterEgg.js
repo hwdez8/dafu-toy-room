@@ -34,7 +34,7 @@
     function initBowClickListener() {
         let bowClickCount = 0;
         let lastBowClickTime = 0;
-        const BOW_CLICK_TIMEOUT = 2000; // 2秒内完成5次点击
+        const BOW_CLICK_TIMEOUT = 3000; // 3秒内完成5次点击
         
         // 等待大门页面加载完成
         const initBowListener = () => {
@@ -45,28 +45,45 @@
                 return;
             }
             
-            gateTitle.addEventListener('click', (e) => {
+            console.log('🎀 标题点击监听器已绑定');
+            
+            // 处理点击/触摸的函数
+            const handleTap = (e) => {
                 if (isGameActive) return;
+                
+                // 阻止默认行为，防止触发其他点击事件
+                e.preventDefault();
+                e.stopPropagation();
                 
                 const now = Date.now();
                 
                 // 检查是否在超时时间内
                 if (now - lastBowClickTime > BOW_CLICK_TIMEOUT) {
                     bowClickCount = 0;
+                    console.log('🎀 点击超时，计数重置');
                 }
                 
                 lastBowClickTime = now;
                 bowClickCount++;
                 
+                console.log(`🎀 标题被点击 ${bowClickCount}/5 次`);
+                
                 // 点击5次触发彩蛋
                 if (bowClickCount >= 5) {
                     bowClickCount = 0;
+                    console.log('🎀 触发彩蛋！');
                     startEasterEgg();
                 }
-            });
+            };
             
-            // 添加视觉提示（可选）
+            // 同时绑定 click 和 touchend 事件
+            gateTitle.addEventListener('click', handleTap);
+            gateTitle.addEventListener('touchend', handleTap, { passive: false });
+            
+            // 添加视觉提示
             gateTitle.style.cursor = 'pointer';
+            gateTitle.style.userSelect = 'none';
+            gateTitle.style.webkitUserSelect = 'none';
         };
         
         initBowListener();
