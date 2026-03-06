@@ -15,7 +15,7 @@ const url = require('url');
 // 配置
 const CONFIG = {
     port: process.env.PORT || 3000,
-    apiKey: 'sk-6e1ba6b86479412f86086262082066a1',
+    apiKey: process.env.DEEPSEEK_API_KEY || '',
     apiEndpoint: 'api.deepseek.com',
     apiPath: '/v1/chat/completions'
 };

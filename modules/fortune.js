@@ -154,10 +154,10 @@
     // 获取DOM元素
     function getElements() {
         elements = {
-            fortuneBtns: document.querySelectorAll('.fortune-btn'),
+            fortuneBtns: document.querySelectorAll('.fortune-btn-large'),
             generalBtn: document.getElementById('generalFortuneBtn'),
             result: document.getElementById('fortuneResult'),
-            catSpeech: document.querySelector('.cat-speech')
+            catSpeech: document.querySelector('.cat-speech-large')
         };
     }
     

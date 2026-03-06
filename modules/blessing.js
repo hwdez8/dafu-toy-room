@@ -56,12 +56,7 @@
         elements = {
             blessingBtn: document.getElementById('blessingBtn'),
             blessingResult: document.getElementById('blessingResult'),
-            blessingCard: document.getElementById('blessingCard'),
-            blessingText: document.getElementById('blessingText'),
-            blessingEmoji: document.getElementById('blessingEmoji'),
-            blessingDesc: document.getElementById('blessingDesc'),
-            blessingCounter: document.getElementById('blessingCounter'),
-            fuCharacter: document.getElementById('fuCharacter')
+            blessingCounter: document.getElementById('blessingCounter')
         };
     }
     

@@ -94,7 +94,7 @@
     // 获取DOM元素
     function getElements() {
         elements = {
-            foodTags: document.querySelectorAll('.food-tag'),
+            foodTags: document.querySelectorAll('.food-tag-large'),
             decideBtn: document.getElementById('decideFoodBtn'),
             result: document.getElementById('foodResult')
         };
@@ -114,7 +114,7 @@
         });
         
         // 添加点击动画
-        const activeTag = document.querySelector(`.food-tag[data-type="${type}"]`);
+        const activeTag = document.querySelector(`.food-tag-large[data-type="${type}"]`);
         if (activeTag) {
             DafuToyRoom.Utils.animate(activeTag, 'pulse', 300);
         }
