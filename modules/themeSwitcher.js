@@ -113,28 +113,53 @@
             }
             
             .theme-btn {
-                width: 50px;
-                height: 50px;
+                width: 60px;
+                height: 60px;
                 border-radius: 50%;
                 border: none;
-                background: var(--card-bg);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+                background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+                color: white;
                 cursor: pointer;
-                transition: all 0.3s ease;
+                box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+                transition: transform 0.3s, box-shadow 0.3s;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                color: var(--primary-color);
+                animation: theme-btn-appear 0.5s ease-out;
+            }
+            
+            @keyframes theme-btn-appear {
+                0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+                70% { transform: scale(1.1) rotate(10deg); }
+                100% { transform: scale(1) rotate(0deg); opacity: 1; }
             }
             
             .theme-btn svg {
-                width: 24px;
-                height: 24px;
+                width: 28px;
+                height: 28px;
             }
             
             .theme-btn:hover {
-                transform: scale(1.1) rotate(15deg);
-                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+                transform: scale(1.1) rotate(-10deg);
+                box-shadow: 0 8px 30px rgba(255, 107, 157, 0.5);
+            }
+            
+            .theme-btn::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background: inherit;
+                opacity: 0.4;
+                animation: theme-pulse 2s infinite;
+                z-index: -1;
+            }
+            
+            @keyframes theme-pulse {
+                0% { transform: scale(1); opacity: 0.4; }
+                50% { transform: scale(1.3); opacity: 0; }
+                100% { transform: scale(1); opacity: 0; }
             }
             
             .theme-panel {
@@ -195,22 +220,22 @@
             
             @media (max-width: 768px) {
                 .theme-switcher {
-                    bottom: 90px;
+                    bottom: 85px;
                     left: 20px;
                 }
                 
                 .theme-btn {
-                    width: 40px;
-                    height: 40px;
+                    width: 50px;
+                    height: 50px;
                 }
                 
                 .theme-btn svg {
-                    width: 20px;
-                    height: 20px;
+                    width: 24px;
+                    height: 24px;
                 }
                 
                 .theme-panel {
-                    bottom: 50px;
+                    bottom: 60px;
                     left: 0;
                     top: auto;
                 }
