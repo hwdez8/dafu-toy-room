@@ -134,150 +134,104 @@ const ModuleRegistry = {
 const LoadingManager = {
     banner: null,
     progressBar: null,
-    tipsElement: null,
+    loadingHint: null,
+    hintInterval: null,
     progress: 0,
-    tipIndex: 0,
-    tipInterval: null,
-    progressInterval: null,
     
-    // 装修提示列表
-    tips: [
-        { emoji: '🏗️', text: '大福正在搬积木...' },
-        { emoji: '🎨', text: '给墙壁刷上粉色油漆...' },
-        { emoji: '🧹', text: '打扫玩具房的每个角落...' },
-        { emoji: '🎀', text: '系上可爱的蝴蝶结...' },
-        { emoji: '🪄', text: '施展魔法布置家具...' },
-        { emoji: '🌸', text: '摆放新鲜的花朵...' },
-        { emoji: '✨', text: '撒上闪闪发光的星星...' },
-        { emoji: '🎮', text: '调试各种游戏设备...' },
-        { emoji: '🐱', text: '召唤小猫咪来帮忙...' },
-        { emoji: '🍰', text: '准备美味的下午茶...' },
-        { emoji: '💡', text: '点亮温暖的灯光...' },
-        { emoji: '🎵', text: '播放轻快的音乐...' },
-        { emoji: '🪞', text: '擦拭镜子让它闪闪发亮...' },
-        { emoji: '🧸', text: '把毛绒玩具排排坐...' },
-        { emoji: '🎪', text: '搭建马戏团帐篷...' },
-        { emoji: '🌈', text: '挂上彩虹色的窗帘...' },
-        { emoji: '🔮', text: '给水晶球充能...' },
-        { emoji: '📚', text: '整理书架上的故事书...' },
-        { emoji: '🎈', text: '吹起五颜六色的气球...' },
-        { emoji: '💝', text: '把爱心贴满整个房间...' }
+    // 装修提示语列表
+    hints: [
+        '🏗️ 大福正在搬运积木...',
+        '🎨 给墙壁刷上粉色油漆...',
+        '🎪 搭建游戏舞台...',
+        '🧸 把玩具摆放整齐...',
+        '✨ 撒上魔法闪粉...',
+        '🎀 系上蝴蝶结装饰...',
+        '🌈 调试彩虹灯光...',
+        '🎵 播放欢快的音乐...',
+        '🍭 准备糖果补给...',
+        '🎈 给气球充满气...',
+        '🎪 检查游戏设备...',
+        '💖 添加爱心特效...',
+        '🌟 点亮星星灯...',
+        '🎮 测试游戏按钮...',
+        '🎊 做最后的检查...'
     ],
     
     init() {
         this.banner = document.getElementById('loadingBanner');
         this.progressBar = document.getElementById('loadingProgressBar');
-        this.tipsElement = document.getElementById('loadingTips');
+        this.loadingHint = document.getElementById('loadingHint');
         
         if (!this.banner) return;
         
         // 开始进度条动画
         this.startProgress();
-        // 开始提示轮换
-        this.startTipsRotation();
         
-        // 2.5秒后完成加载
+        // 开始提示语轮换
+        this.startHintRotation();
+        
+        // 模拟加载过程（2.5秒后完成）
         setTimeout(() => {
             this.complete();
         }, 2500);
     },
     
     startProgress() {
-        // 进度条动画 - 不均匀增长，模拟真实加载
+        if (!this.progressBar) return;
+        
+        // 快速增加进度，营造"正在迅速装修"的感觉
         const updateProgress = () => {
-            if (this.progress >= 100) {
-                clearInterval(this.progressInterval);
-                return;
-            }
+            if (this.progress >= 100) return;
             
-            // 随机增加进度，前快后慢
-            let increment;
-            if (this.progress < 30) {
-                increment = Math.random() * 8 + 3; // 3-11%
-            } else if (this.progress < 60) {
-                increment = Math.random() * 5 + 2; // 2-7%
-            } else if (this.progress < 85) {
-                increment = Math.random() * 3 + 1; // 1-4%
+            // 前80%快速加载，后20%稍微放慢
+            if (this.progress < 80) {
+                this.progress += Math.random() * 15 + 5;
             } else {
-                increment = Math.random() * 2 + 0.5; // 0.5-2.5%
+                this.progress += Math.random() * 8 + 2;
             }
             
-            this.progress = Math.min(100, this.progress + increment);
+            if (this.progress > 100) this.progress = 100;
+            this.progressBar.style.width = this.progress + '%';
             
-            if (this.progressBar) {
-                this.progressBar.style.width = this.progress + '%';
+            if (this.progress < 100) {
+                setTimeout(updateProgress, Math.random() * 150 + 80);
             }
         };
         
-        // 每80ms更新一次进度
-        this.progressInterval = setInterval(updateProgress, 80);
+        updateProgress();
     },
     
-    startTipsRotation() {
-        // 打乱提示顺序
-        this.shuffleTips();
+    startHintRotation() {
+        if (!this.loadingHint) return;
         
-        // 立即显示第一条
-        this.updateTip();
+        let hintIndex = 0;
         
-        // 每150ms轮换一次提示，快速变换效果
-        this.tipInterval = setInterval(() => {
-            this.tipIndex = (this.tipIndex + 1) % this.tips.length;
-            this.updateTip();
-        }, 150);
-        
-        // 加载完成前逐渐减慢速度
-        setTimeout(() => {
-            clearInterval(this.tipInterval);
-            this.tipInterval = setInterval(() => {
-                this.tipIndex = (this.tipIndex + 1) % this.tips.length;
-                this.updateTip();
-            }, 300);
-        }, 1500);
-    },
-    
-    shuffleTips() {
-        // Fisher-Yates 洗牌算法
-        for (let i = this.tips.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this.tips[i], this.tips[j]] = [this.tips[j], this.tips[i]];
-        }
-    },
-    
-    updateTip() {
-        if (!this.tipsElement) return;
-        
-        const tip = this.tips[this.tipIndex];
-        
-        // 添加淡出效果
-        this.tipsElement.style.opacity = '0';
-        this.tipsElement.style.transform = 'translateY(10px)';
-        
-        setTimeout(() => {
-            this.tipsElement.textContent = `${tip.emoji} ${tip.text}`;
-            // 淡入效果
-            this.tipsElement.style.opacity = '1';
-            this.tipsElement.style.transform = 'translateY(0)';
-        }, 50);
+        this.hintInterval = setInterval(() => {
+            hintIndex = (hintIndex + 1) % this.hints.length;
+            this.loadingHint.style.animation = 'none';
+            // 强制重绘
+            void this.loadingHint.offsetWidth;
+            this.loadingHint.textContent = this.hints[hintIndex];
+            this.loadingHint.style.animation = 'hintPulse 0.4s ease';
+        }, 350); // 每350ms切换一次，快速变换
     },
     
     complete() {
         if (!this.banner) return;
         
-        // 停止所有动画
-        clearInterval(this.progressInterval);
-        clearInterval(this.tipInterval);
-        
-        // 确保进度条到100%
-        if (this.progressBar) {
-            this.progressBar.style.width = '100%';
+        // 停止提示语轮换
+        if (this.hintInterval) {
+            clearInterval(this.hintInterval);
         }
         
         // 显示完成提示
-        if (this.tipsElement) {
-            this.tipsElement.textContent = '✨ 装修完成！欢迎光临~';
-            this.tipsElement.style.color = '#ff6b9d';
-            this.tipsElement.style.fontWeight = 'bold';
+        if (this.loadingHint) {
+            this.loadingHint.textContent = '✨ 装修完成！欢迎光临~';
+        }
+        
+        // 进度条完成
+        if (this.progressBar) {
+            this.progressBar.style.width = '100%';
         }
         
         // 添加完成动画类

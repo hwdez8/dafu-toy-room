@@ -9,17 +9,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- 装修加载动画横幅 -->
+    <!-- 伪加载动画横幅 -->
     <div id="loadingBanner" class="loading-banner">
         <div class="loading-content">
-            <span class="loading-ribbon">🎀</span>
-            <span class="loading-text">正在装修大福的玩具房...</span>
-            <!-- 装修进度条 -->
+            <div class="loading-main">
+                <span class="loading-ribbon">🎀</span>
+                <span class="loading-hint" id="loadingHint">🏗️ 大福正在搬运积木...</span>
+            </div>
             <div class="loading-progress-container">
                 <div class="loading-progress-bar" id="loadingProgressBar"></div>
             </div>
-            <!-- 装修提示 -->
-            <div class="loading-tips" id="loadingTips">🏗️ 大福正在搬积木...</div>
         </div>
     </div>
     

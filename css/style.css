@@ -54,23 +54,22 @@
 }
 
 /* ========================================
-   装修加载动画横幅
+   伪加载动画横幅
    ======================================== */
 .loading-banner {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100px;
-    background: linear-gradient(90deg, #ff6b9d, #ffc2d1, #ff8fab, #ffc2d1, #ff6b9d);
-    background-size: 300% 100%;
-    animation: loadingGradient 3s ease infinite;
+    height: 60px;
+    background: linear-gradient(90deg, #ff6b9d, #ffc2d1, #ff6b9d);
+    background-size: 200% 100%;
+    animation: loadingGradient 2s ease infinite;
     z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
 }
 
 .loading-banner.hide {
@@ -87,48 +86,48 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
+    justify-content: center;
+    gap: 10px;
+    padding: 8px 20px;
+}
+
+.loading-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 .loading-ribbon {
     font-size: 28px;
     display: inline-block;
     animation: ribbonBounce 1s ease infinite;
+    flex-shrink: 0;
 }
 
 @keyframes ribbonBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
 }
 
-.loading-text {
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-/* 进度条容器 */
 .loading-progress-container {
-    width: 280px;
-    height: 8px;
+    width: 200px;
+    height: 4px;
     background: rgba(255, 255, 255, 0.3);
-    border-radius: 10px;
+    border-radius: 2px;
     overflow: hidden;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* 进度条 */
 .loading-progress-bar {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #fff 0%, #fff5f7 50%, #fff 100%);
+    background: linear-gradient(90deg, #fff, #ffe4ec, #fff);
     background-size: 200% 100%;
-    border-radius: 10px;
-    transition: width 0.1s ease-out;
+    border-radius: 2px;
+    transition: width 0.3s ease;
     animation: progressShine 1.5s linear infinite;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
 }
 
 @keyframes progressShine {
@@ -136,16 +135,19 @@
     100% { background-position: -200% 0; }
 }
 
-/* 装修提示 */
-.loading-tips {
+.loading-hint {
     color: white;
-    font-size: 13px;
-    font-weight: 500;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
-    min-height: 20px;
-    transition: opacity 0.05s ease, transform 0.05s ease;
-    opacity: 1;
-    transform: translateY(0);
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    letter-spacing: 0.5px;
+    animation: hintPulse 0.4s ease;
+    white-space: nowrap;
+}
+
+@keyframes hintPulse {
+    0% { opacity: 0; transform: translateY(5px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 /* 加载完成动画 - 🎀蓄力跳出 */
@@ -155,9 +157,9 @@
 
 @keyframes ribbonPowerUp {
     0% { transform: translateY(0) scale(1); }
-    30% { transform: translateY(15px) scale(0.85); }
-    60% { transform: translateY(-70px) scale(1.25); }
-    100% { transform: translateY(-90px) scale(1); }
+    30% { transform: translateY(20px) scale(0.8); }
+    60% { transform: translateY(-80px) scale(1.3); }
+    100% { transform: translateY(-100px) scale(1); }
 }
 
 /* ========================================
