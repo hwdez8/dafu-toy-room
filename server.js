@@ -31,7 +31,7 @@ const CONFIG = {
 // ========================================
 // 访客统计系统
 // ========================================
-const STATS_FILE = path.join(__dirname, 'stats.json');
+const STATS_FILE = path.join(__dirname, '/data/stats.json');
 
 // 内存中的统计数据
 let serverStats = {
@@ -783,7 +783,7 @@ const server = http.createServer((req, res) => {
     log(`${req.method} ${pathname}`);
     
     // 并发访问限制检查（仅对主页面和API）
-    const isMainPage = pathname === '/' || pathname === '/index.html';
+    const isMainPage = pathname === '/' || pathname === '/website/index.html';
     const isAPI = pathname.startsWith('/api/');
     
     if (isMainPage || isAPI) {
@@ -855,9 +855,20 @@ const server = http.createServer((req, res) => {
     }
     
     // 静态文件服务
-    let filePath = pathname === '/' ? '/index.html' : pathname;
-    filePath = path.join(__dirname, filePath);
-    
+    let filePath = '';
+    if(pathname === '/'){
+        filePath = path.join(__dirname,'website','index.html');
+    }
+    else{
+        const websitePath = path.join(__dirname, 'website', pathname);
+        if(fs.existsSync(websitePath) && fs.statSync(websitePath).isFile()){
+            filePath = websitePath;
+        }
+        else{
+            filePath = path.join(__dirname, pathname);
+        }
+    }
+
     // 安全检查：防止目录遍历
     const resolvedPath = path.resolve(filePath);
     const rootPath = path.resolve(__dirname);
@@ -870,6 +881,16 @@ const server = http.createServer((req, res) => {
     
     serveFile(filePath, res);
 });
+
+// 创建本地文件
+let statsDir = path.dirname(STATS_FILE);
+if(!fs.existsSync(statsDir)){fs.mkdirSync(statsDir, {recursive:true});}
+if(!fs.existsSync(STATS_FILE)){
+    fs.copyFileSync(
+        path.join(__dirname,'json','stats.json'), 
+        STATS_FILE
+    );
+}
 
 // 启动服务器
 server.listen(CONFIG.port, () => {
