@@ -1,0 +1,35 @@
+{
+  "today": {
+    "date": "Sat Mar 07 2026",
+    "uniqueVisitors": 0,
+    "totalVisits": 0,
+    "visitorIPs": [],
+    "moduleUsage": {
+      "guessNumber": 0,
+      "whatToEat": 0,
+      "fortune": 0,
+      "blessing": 0,
+      "aiChat": 0,
+      "whackAMole": 0,
+      "luckyWheel": 0,
+      "passwordGen": 0,
+      "moodDiary": 0
+    }
+  },
+  "total": {
+    "uniqueVisitors": 0,
+    "totalVisits": 0,
+    "moduleUsage": {
+      "guessNumber": 0,
+      "whatToEat": 0,
+      "fortune": 0,
+      "blessing": 0,
+      "aiChat": 0,
+      "whackAMole": 0,
+      "luckyWheel": 0,
+      "passwordGen": 0,
+      "moodDiary": 0
+    },
+    "lastUpdated": null
+  }
+}
